@@ -2,6 +2,13 @@
 
 > 本组件采用 vite 2.x 构建，因此仅支持原生支持 ESM 的浏览器使用。
 
+
+[在线Demo](https://gk-shi.github.io/v3-waterfall/)
+
+该 demo 即为本项目`example/`内容。
+
+个人博客使用地址：[这里](https://gkshi.com/blog)
+
 ### 1.支持功能
 
 - 一个针对 vue 3 的瀑布流组件
