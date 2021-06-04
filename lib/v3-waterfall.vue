@@ -24,7 +24,7 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/ban-types */
-import { computed, defineComponent, onBeforeUnmount, onMounted, toRefs, watch } from 'vue'
+import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
 import { calcuateCols, imagePreload, layout } from './composable'
 import ERRORIMGSRC from './utils/errorImgBase64'
@@ -169,12 +169,21 @@ export default defineComponent({
         firstOrReset()
       }, 500)
     }
+
+    // 兼容滚动事件绑定在 window 上，
+    // 并且页面被 keep-alive 缓存时滚动穿越的情形
+    // (a 页面绑定滚动被缓存，b 页面滚动会影响 a 页面的监听)
+    let isActive = true
+    onActivated(() => (isActive = true))
+    onDeactivated(() => (isActive = false))
+
+
     // 滚动
     let scrollElement: Window | HTMLElement = window
     let body = document.documentElement || document.body
     let scrollTimeoutHandle: number
     const scrollFn = (): void => {
-      if (actualLoading.value || isOver.value) return
+      if (actualLoading.value || isOver.value || !isActive) return
       const [scrollHeight, scrollTop, clientHeight] = [body.scrollHeight, body.scrollTop, body.clientHeight]
       if (scrollHeight - scrollTop - clientHeight <= distanceToScroll) {
         clearTimeout(scrollTimeoutHandle)
@@ -184,6 +193,7 @@ export default defineComponent({
       }
     }
 
+    // 如果滚动事件是绑定在非 window 对象上使用
     watch(isMounted, (newV: boolean) => {
       if (scrollBodySelector && newV) {
         scrollElement.removeEventListener('scroll', scrollFn)
