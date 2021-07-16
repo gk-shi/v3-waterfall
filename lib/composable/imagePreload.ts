@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComputedRef, Ref, ref, nextTick } from 'vue'
 
-
+export type ListItem = Record<string, any>
 type ImagePreload = {
-  actualList: Ref<Record<string, any>[]>;
+  actualList: Ref<ListItem[]>;
   setLastPreloadImgIdx: (idx: number) => void;
-  setActualList: (newList: Record<string, any>[]) => void;
-  imagePreloadHandle: (noPreloadList: Record<string, any>[], actualColWidth: Ref<number>, preloadedFn: () => unknown | undefined, srcKey: string, errorImgHeight: ComputedRef<number>, errorImgSrc: string) => void;
+  setActualList: (newList: ListItem[]) => void;
+  imagePreloadHandle: (noPreloadList: ListItem[], actualColWidth: Ref<number>, preloadedFn: () => unknown | undefined, srcKey: string, errorImgHeight: ComputedRef<number>, errorImgSrc: string) => void;
 }
 
 export default function imagePreload (): ImagePreload {
-  const actualList = ref<Record<string, any>[]>([])  // 实际用来渲染的列表
-  const setActualList = (newList: Record<string, any>[]): void => {
+  const actualList = ref<ListItem[]>([])  // 实际用来渲染的列表
+  const setActualList = (newList: ListItem[]): void => {
     actualList.value = newList
   }
 
@@ -25,7 +25,7 @@ export default function imagePreload (): ImagePreload {
 
   /**
    * @description: 图片预加载
-   * @param {unknown[]} noPreloadList 未进行预加载的列表
+   * @param {ListItem[]} noPreloadList 未进行预加载的列表
    * @param {Ref<number>} actualColWidth 实际列宽
    * @param {Function | undefined} preloadedFn 预加载完成后的回调
    * @param {string} srcKey 存放图片链接的键名
@@ -33,9 +33,9 @@ export default function imagePreload (): ImagePreload {
    * @param {string} errorImgSrc 图片加载失败时默认图片地址
    * @return {void}
    */
-  const imagePreloadHandle = (noPreloadList: Record<string, any>[], actualColWidth: Ref<number>, preloadedFn: () => unknown | undefined, srcKey: string, errorImgHeight: ComputedRef<number>, errorImgSrc: string): void => {
-    let tmpIdx = lastPreloadImgIdx === 0 ? 0 : lastPreloadImgIdx + 1
-    const tmpArr: unknown[] = []
+  const imagePreloadHandle = (noPreloadList: ListItem[], actualColWidth: Ref<number>, preloadedFn: () => unknown | undefined, srcKey: string, errorImgHeight: ComputedRef<number>, errorImgSrc: string): void => {
+    let tmpIdx = lastPreloadImgIdx + 1
+    const tmpArr: ListItem[] = []
     while (tmpIdx < noPreloadList.length) {
       const item = noPreloadList[tmpIdx]
       tmpArr.push(item)
