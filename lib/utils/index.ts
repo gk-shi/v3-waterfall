@@ -1,14 +1,16 @@
 /**
- * 获取是移动端还是 PC 端
- * @param userAgent
+ * @description: 获取设备是型号
+ * @param {string} userAgent window.userAgent
+ * @return {string} mobile/ipad/pc
  */
 export function getDevice (userAgent: string): string {
   return /(Android|iPhone|iPod|iOS|SymbianOS|Windows Phone)/ig.test(userAgent) ? 'mobile' : /iPad/ig.test(userAgent) ? 'ipad' : 'pc'
 }
 
 /**
- * 判断屏幕最大宽度不超过
- * @param width 允许最大屏幕宽度, default: 576
+ * @description: 判断屏幕最大宽度不超过
+ * @param {number} width 要判断的最大宽度
+ * @return {boolean} 屏幕宽度是否小于等于 width
  */
 export function screenMaxIs (width = 576): boolean {
   return window.screen.width <= width

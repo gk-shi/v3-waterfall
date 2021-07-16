@@ -26,7 +26,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
-import { calcuateCols, imagePreload, layout } from './composable'
+import { calculateCols, imagePreload, layout } from './composable'
 import ERRORIMGSRC from './utils/errorImgBase64'
 
 
@@ -35,7 +35,7 @@ export default defineComponent({
   props: {
     list: {
       type: Array,
-      default: (): unknown[] => []
+      default: () => []
     },
     colWidth: { // 每列的宽度，不包括两列的间隔
       type: Number,
@@ -105,8 +105,8 @@ export default defineComponent({
       actualColWidth,
       actualCols,
       colsTop,
-      calcuateActualCols
-    } = calcuateCols(colWidth, gap, mobileGap)
+      calculateActualCols
+    } = calculateCols(colWidth, gap, mobileGap)
 
 
     const {
@@ -146,7 +146,7 @@ export default defineComponent({
       setLastPreloadImgIdx(-1)
       setLastLayoutImgIdx(-1)
       setActualList([])
-      calcuateActualCols(isMobile)
+      calculateActualCols(isMobile)
       waterfall(list.value as T[])
     }
 
