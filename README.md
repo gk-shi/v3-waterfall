@@ -1,5 +1,15 @@
 ## v3-waterfall 自适应瀑布流组件
 
+&nbsp;
+<p align="center">
+  <a href="https://npmjs.com/package/v3-waterfall"><img src="https://img.shields.io/npm/v/v3-waterfall.svg" alt="npm package"></a>
+  <a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/vite.svg" alt="node compatibility"></a>
+  <a href="https://img.shields.io/npm/dt/v3-waterfall"><img src="https://img.shields.io/npm/dt/v3-waterfall.svg" alt="downloads"></a>
+  <a href="https://img.shields.io/npm/l/v3-waterfall"><img src="https://img.shields.io/npm/l/v3-waterfall.svg" alt="downloads"></a>
+</p>
+
+&nbsp;
+
 > 本组件采用 vite 2.x 构建，因此仅支持原生支持 ESM 的浏览器使用。
 
 
@@ -9,6 +19,7 @@
 
 个人博客使用地址：[这里](https://gkshi.com/blog)
 
+&nbsp;
 ### 1.支持功能
 
 - 一个针对 vue 3 的瀑布流组件
@@ -17,10 +28,7 @@
 - 响应式排版
 - 支持绑定滚动父元素
 
-
-
-
-
+&nbsp;
 ### 2.使用方法
 
 #### 2.1 安装
@@ -45,7 +53,7 @@ createApp(App)
 
 ```
 
-### 2.3 引入使用
+#### 2.3 引入使用
 
 ```vue
 <v3-waterfall class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280"
@@ -59,9 +67,7 @@ createApp(App)
 更为完整的基本示例在`example/App.vue`中有具体代码，同时本项目`yarn dev`运行起来的项目即能看到效果。
 
 
-
-
-
+&nbsp;
 ### 3.组件参数说明
 
 |        参数        |   类型   |          默认值          |                             描述                             |
@@ -118,9 +124,7 @@ createApp(App)
 由于子组件的`mounted`生命周期比父组件`mounted`先执行，所以需要通过父组件主动通知已挂载完成后，子组件才能往`div.father-box`元素上添加滚动监听等事件。
 
 
-
-
-
+&nbsp;
 ### 4.slot插槽
 
 #### 4.1 默认插槽(v-slot:default)
