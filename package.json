@@ -12,13 +12,13 @@
     "./": "./dist/"
   },
   "files": [
-    "lib",
     "dist"
   ],
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build:page": "vue-tsc --noEmit && cross-env TARGET=page vite build",
+    "build:npm": "vue-tsc --noEmit && cross-env TARGET=npm vite build ",
     "serve": "vite preview"
   },
   "dependencies": {},
@@ -29,6 +29,7 @@
     "@vue/compiler-sfc": "^3.0.5",
     "@vue/eslint-config-standard": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.25.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
