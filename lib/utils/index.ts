@@ -1,5 +1,5 @@
 /**
- * @description: 获取设备是型号
+ * @description: 获取设备的型号
  * @param {string} userAgent window.userAgent
  * @return {string} mobile/ipad/pc
  */

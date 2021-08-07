@@ -158,9 +158,14 @@ export default defineComponent({
       waterfall(newV as T[])
     })
 
+    const documentBody = document.documentElement || document.body
     // resize 时的 handle
     let timeHandler: number
+    let lastClientWidth = documentBody.offsetWidth
     const resizeHandle = (): void => {
+      const clientWidth = documentBody.offsetWidth
+      if (clientWidth === lastClientWidth) return
+      lastClientWidth = clientWidth
       clearTimeout(timeHandler)
       // 重新计算
       timeHandler = setTimeout(() => {
