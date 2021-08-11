@@ -10,7 +10,7 @@
 
 &nbsp;
 
-> 本组件采用 vite 2.x 构建，因此仅支持原生支持 ESM 的浏览器使用。
+> 本组件支持 ESM 和 UMD 两种方式引入。
 
 
 [在线Demo](https://gk-shi.github.io/v3-waterfall/)
