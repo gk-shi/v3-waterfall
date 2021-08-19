@@ -116,7 +116,6 @@ export default defineComponent({
       imagePreloadHandle
     } = imagePreload()
 
-
     const {
       wrapperHeight,
       setLastLayoutImgIdx,

@@ -10,9 +10,9 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "types": ["vite/client"],
-    "declaration": true,
-    "declarationDir": "./dist",
+    // "declaration": true,
+    // "declarationDir": "./dist",
     // "emitDeclarationOnly": true
   },
-  "include": ["example/*.d.ts", "lib/**/*.ts", "lib/*.ts", "lib/*.d.ts"]
+  "include": ["example/*.d.ts", "example/**/*.ts", "example/**/*.vue", "lib/**/*.ts", "lib/*.ts", "lib/*.d.ts", "lib/**/*.vue"]
 }

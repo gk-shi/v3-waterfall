@@ -14,15 +14,18 @@
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts",
+  "typings": "dist/typings/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build:page": "vue-tsc --noEmit && cross-env TARGET=page vite build",
     "build:npm": "vue-tsc --noEmit && cross-env TARGET=npm vite build ",
+    "build:types": "tsc --project lib/tsconfig.json",
+    "build": "npm run build:npm && npm run build:types",
     "serve": "vite preview"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/node": "^16.6.1",
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
     "@vitejs/plugin-vue": "^1.2.2",

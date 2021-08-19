@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 const target = process.env.TARGET
-let buildConfig = {
+let buildConfig: Record<string, unknown> = {
   lib: {
     entry: path.resolve(__dirname, 'lib/index.ts'),
     name: 'v3-waterfall'
