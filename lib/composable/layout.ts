@@ -18,7 +18,14 @@ type Layout = {
  * @param {number} bottomGap 底部距离
  * @return {Layout}
  */
-export default function layout (list: Ref<unknown[]>, actualColWidth: Ref<number>, actualList: Ref<ListItem[]>, actualCols: Ref<number>, actualGap: number, bottomGap: number): Layout {
+export default function layout (
+  list: Ref<unknown[]>,
+  actualColWidth: Ref<number>,
+  actualList: Ref<ListItem[]>,
+  actualCols: Ref<number>,
+  actualGap: number,
+  bottomGap: number
+): Layout {
   let lastLayoutImgIdx = -1  // 上一次排版最后排的元素下标
 
   const setLastLayoutImgIdx = (idx: number): void => {

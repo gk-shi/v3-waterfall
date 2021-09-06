@@ -12,7 +12,7 @@ export function getDevice (userAgent: string): string {
  * @param {number} width 要判断的最大宽度
  * @return {boolean} 屏幕宽度是否小于等于 width
  */
-export function screenMaxIs (width = 576): boolean {
+export function screenMaxIs (width: number): boolean {
   return window.screen.width <= width
 }
 

@@ -27,7 +27,6 @@
 import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
 import { calculateCols, imagePreload, layout } from './composable'
-import ERRORIMGSRC from './utils/errorImgBase64'
 
 
 export default defineComponent({
@@ -95,7 +94,6 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { srcKey, bottomGap, distanceToScroll, scrollBodySelector, errorImgSrc } = props
 
-    const ERROR_IMG_SRC = errorImgSrc || ERRORIMGSRC
 
     // 是否为手机端
     let isMobile = getDevice(navigator.userAgent) === 'mobile'
@@ -132,11 +130,10 @@ export default defineComponent({
       return isLoading.value || actualList.value.length !== list.value.length
     })
 
-    const errorImgHeight = computed(() => actualColWidth.value || 145)  // 默认错误图片的高度
     // 进行瀑布流计算
     const waterfall = <T extends object>(itemList: T[]): void => {
       const itemListNew: T[] = JSON.parse(JSON.stringify(itemList))
-      imagePreloadHandle(itemListNew, actualColWidth, () => layoutHandle(colsTop), srcKey, errorImgHeight, ERROR_IMG_SRC)
+      imagePreloadHandle(itemListNew, actualColWidth, () => layoutHandle(colsTop), srcKey, errorImgSrc)
     }
 
 

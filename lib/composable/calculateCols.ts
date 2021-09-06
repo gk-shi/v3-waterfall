@@ -15,7 +15,11 @@ type CalculateActualCols = {
  * @param {Ref<number>} mobileGap 移动端两列的间距
  * @return {CalculateActualCols}
  */
-export default function calculateCols (colWidth: Ref<number>, gap: Ref<number>, mobileGap: Ref<number>): CalculateActualCols {
+export default function calculateCols (
+  colWidth: Ref<number>,
+  gap: Ref<number>,
+  mobileGap: Ref<number>
+): CalculateActualCols {
   const actualColWidth = ref(0)  // 实际列宽
   const actualCols = ref(1)  // 实际列数
   const colsTop = ref<number[]>([])  // 记录每列的 top 值
