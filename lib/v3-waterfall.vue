@@ -133,7 +133,13 @@ export default defineComponent({
     // 进行瀑布流计算
     const waterfall = <T extends object>(itemList: T[]): void => {
       const itemListNew: T[] = JSON.parse(JSON.stringify(itemList))
-      imagePreloadHandle(itemListNew, actualColWidth, () => layoutHandle(colsTop), srcKey, errorImgSrc)
+      imagePreloadHandle(
+        itemListNew,
+        actualColWidth,
+        () => layoutHandle(colsTop),
+        srcKey,
+        errorImgSrc
+      )
     }
 
 
