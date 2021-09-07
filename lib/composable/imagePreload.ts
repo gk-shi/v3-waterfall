@@ -1,13 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ref, ref, nextTick } from 'vue'
-import { _image, _height } from '../utils/errorImgBase64'
+import { _image } from '../utils/errorImgBase64'
 
 export type ListItem = Record<string, any>
 type ImagePreload = {
   actualList: Ref<ListItem[]>;
   setLastPreloadImgIdx: (idx: number) => void;
   setActualList: (newList: ListItem[]) => void;
-  imagePreloadHandle: (noPreloadList: ListItem[], actualColWidth: Ref<number>, preloadedFn: () => unknown | undefined, srcKey: string, errorImgSrc: string) => void;
+  imagePreloadHandle: (
+    noPreloadList: ListItem[],
+    actualColWidth: Ref<number>,
+    preloadedFn: () => unknown | undefined,
+    srcKey: string,
+    errorImgSrc: string
+  ) => void;
 }
 
 export default function imagePreload (): ImagePreload {
@@ -101,7 +107,7 @@ export default function imagePreload (): ImagePreload {
     }
     // 用户没有添加错误图片
     if (!errorImgSrc) {
-      setErrorImg(_image, _height)
+      setErrorImg(_image, colWidth.value)
       render && render()
       return
     }
@@ -111,7 +117,7 @@ export default function imagePreload (): ImagePreload {
     errImg.onload = errImg.onerror = (e): void => {
       if ((e as Event).type === 'error') {
         // 用户的图片加载失败，使用内置错误图片
-        setErrorImg(_image, _height)
+        setErrorImg(_image, colWidth.value)
         render && render()
       } else if ((e as Event).type === 'load') {
         const height = Math.round(colWidth.value / (errImg.width / errImg.height))
