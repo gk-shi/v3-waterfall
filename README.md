@@ -57,7 +57,21 @@ createApp(App)
 
 ```vue
 <v3-waterfall class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280"
-              :distanceToScroll="200" :isLoading="loading" :isOver="over" @scrollReachBottom="getNext"></v3-waterfall>
+              :distanceToScroll="200" :isLoading="loading" :isOver="over" @scrollReachBottom="getNext">
+  <template v-slot:default="slotProp">
+    <div class="list-item">
+      <a :href="'https://gkshi.com/blog/' + slotProp.item._id">
+        <div class="cover-wrapper">
+          <img v-if="slotProp.item.cover" :src="slotProp.item.cover" class="cover" />
+        </div>
+        <div class="brief">
+          <h3>{{ slotProp.item.title }}</h3>
+          <p>{{ slotProp.item.outline }}</p>
+        </div>
+      </a>
+    </div>
+  </template>
+</v3-waterfall>
 ```
 
 
