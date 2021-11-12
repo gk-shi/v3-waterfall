@@ -51,6 +51,15 @@ export default function imagePreload (): ImagePreload {
 
     let tmpIdx = lastPreloadImgIdx + 1
     const tmpArr: ListItem[] = []
+
+    const render = () => {
+      // 预加载完成，开始渲染
+      actualList.value = actualList.value.concat(tmpArr)
+      nextTick(() => {
+        // 图片预加载完成后的回调
+        preloadedFn && preloadedFn()
+      })
+    }
     while (tmpIdx < noPreloadList.length) {
       const item = noPreloadList[tmpIdx]
       tmpArr.push(item)
@@ -71,18 +80,14 @@ export default function imagePreload (): ImagePreload {
         }
         lastPreloadImgIdx++
         if (lastPreloadImgIdx + 1 === noPreloadList.length) {
-          const render = () => {
-            // 预加载完成，开始渲染
-            actualList.value = actualList.value.concat(tmpArr)
-            nextTick(() => {
-              // 图片预加载完成后的回调
-              preloadedFn && preloadedFn()
-            })
-          }
-
           loadErrorImgOrRender(actualColWidth, srcKey, errorImgSrc, errorItems, render)
         }
       }
+    }
+
+    // 兼容所有内容都没有图片的情况
+    if (lastPreloadImgIdx + 1 === noPreloadList.length) {
+      render()
     }
   }
 
