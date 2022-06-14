@@ -6,7 +6,7 @@
       }">
       <div class="waterfall-item" :style="item.styles || { width: actualColWidth + 'px' }"
         v-for="(item, idx) of actualList" :key="'w' + idx">
-        <slot :item="item"></slot>
+        <slot :item="list[idx]"></slot>
       </div>
     </div>
     <slot v-if="actualLoading && !isOver" name="loading">
