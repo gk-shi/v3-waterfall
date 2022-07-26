@@ -177,7 +177,7 @@ export default defineComponent({
     // 第一次加载或者重载
     const firstOrReset = <T extends object>(): void => {
       if (scrollElement) {
-        (scrollElement as HTMLElement).scrollTop = 0
+        scrollElement.scrollTo(0, 0)
       }
       setLastPreloadImgIdx(-1)
       setLastLayoutImgIdx(-1)
