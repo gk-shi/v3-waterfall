@@ -65,6 +65,7 @@ createApp(App)
           <img v-if="slotProp.item.cover" :src="slotProp.item.cover" class="cover" />
         </div>
         <div class="brief">
+          <!-- slotProp.raw 可直接访问原始数据(响应式) -->
           <h3>{{ slotProp.item.title }}</h3>
           <p>{{ slotProp.item.outline }}</p>
         </div>
@@ -101,7 +102,7 @@ createApp(App)
 |     isMounted      | Boolean  |          false           |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
 |    errorImgSrc     |  String  |            -             |                 图片加载失败时展示的图片地址                 |
 | scrollReachBottom  | Function |            -             |                     触发加载更多时的函数                     |
-
+| reRender  | Function |            -             |                     通过 ref 可直接调用重渲染                     |
 
 
 #### 3.1 特殊字段说明
