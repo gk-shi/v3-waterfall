@@ -6,7 +6,7 @@
       }">
       <div class="waterfall-item" :style="item.styles || { width: actualColWidth + 'px' }"
         v-for="(item, idx) of actualList" :key="'w' + idx">
-        <slot :item="item"></slot>
+        <slot :item="item" :raw="list[idx]"></slot>
       </div>
     </div>
     <slot v-if="actualLoading && !isOver" name="loading">
@@ -142,41 +142,6 @@ export default defineComponent({
       )
     }
 
-
-    // 第一次加载或者重载
-    const firstOrReset = <T extends object>(): void => {
-      setLastPreloadImgIdx(-1)
-      setLastLayoutImgIdx(-1)
-      setActualList([])
-      calculateActualCols(isMobile)
-      waterfall(list.value as T[])
-    }
-
-    watch(list, <T extends object>(newV: unknown[], oldV: unknown[]) => {
-      if (newV[0] !== oldV[0]) {
-        firstOrReset()
-        return
-      }
-      waterfall(newV as T[])
-    })
-
-    const documentBody = document.documentElement || document.body
-    // resize 时的 handle
-    let timeHandler: number
-    let lastClientWidth = documentBody.offsetWidth
-    const resizeHandle = (): void => {
-      const clientWidth = documentBody.offsetWidth
-      if (clientWidth === lastClientWidth) return
-      lastClientWidth = clientWidth
-      clearTimeout(timeHandler)
-      // 重新计算
-      timeHandler = setTimeout(() => {
-        isMobile = getDevice(navigator.userAgent) === 'mobile'
-        actualGap = isMobile ? mobileGap.value : gap.value
-        firstOrReset()
-      }, 500)
-    }
-
     // 兼容滚动事件绑定在 window 上，
     // 并且页面被 keep-alive 缓存时滚动穿越的情形
     // (a 页面绑定滚动被缓存，b 页面滚动会影响 a 页面的监听)
@@ -209,6 +174,44 @@ export default defineComponent({
       }
     })
 
+    // 第一次加载或者重载
+    const firstOrReset = <T extends object>(): void => {
+      if (scrollElement) {
+        (scrollElement as HTMLElement).scrollTop = 0
+      }
+      setLastPreloadImgIdx(-1)
+      setLastLayoutImgIdx(-1)
+      setActualList([])
+      calculateActualCols(isMobile)
+      waterfall(list.value as T[])
+    }
+
+    watch(list, <T extends object>(newV: unknown[], oldV: unknown[]) => {
+      if (newV[0] !== oldV[0]) {
+        firstOrReset()
+        return
+      }
+      waterfall(newV as T[])
+    })
+
+
+    const documentBody = document.documentElement || document.body
+    // resize 时的 handle
+    let timeHandler: number
+    let lastClientWidth = documentBody.offsetWidth
+    const resizeHandle = (): void => {
+      const clientWidth = documentBody.offsetWidth
+      if (clientWidth === lastClientWidth) return
+      lastClientWidth = clientWidth
+      clearTimeout(timeHandler)
+      // 重新计算
+      timeHandler = setTimeout(() => {
+        isMobile = getDevice(navigator.userAgent) === 'mobile'
+        actualGap = isMobile ? mobileGap.value : gap.value
+        firstOrReset()
+      }, 500)
+    }
+
 
     onMounted(() => {
       if (list.value && list.value.length > 0) {
@@ -223,6 +226,8 @@ export default defineComponent({
       scrollElement.removeEventListener('scroll', scrollFn)
     })
 
+    const reRender = firstOrReset  // 暴露给外部的重渲染方法
+
     return {
       isMobile,
       wrapperWidth,
@@ -230,7 +235,8 @@ export default defineComponent({
       actualLoading,
       actualColWidth,
       actualList,
-      actualCols
+      actualCols,
+      reRender
     }
   }
 })
