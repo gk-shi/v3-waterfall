@@ -176,7 +176,8 @@ export default defineComponent({
 
     // 第一次加载或者重载
     const firstOrReset = <T extends object>(): void => {
-      if (scrollElement) {
+      if (scrollElement && scrollBodySelector) {
+        // 在存在指定父元素滚动的时候，切换或重载时需要滚动到顶部
         scrollElement.scrollTo(0, 0)
       }
       setLastPreloadImgIdx(-1)
