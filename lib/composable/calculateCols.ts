@@ -10,12 +10,14 @@ type CalculateActualCols = {
 
 /**
  * @description: 计算排布多少列
+ * @param {String} selector 选择器
  * @param {Ref<number>} colWidth 列宽
  * @param {Ref<number>} gap 两列的间距
  * @param {Ref<number>} mobileGap 移动端两列的间距
  * @return {CalculateActualCols}
  */
 export default function calculateCols (
+  selector: string,
   colWidth: Ref<number>,
   gap: Ref<number>,
   mobileGap: Ref<number>
@@ -28,7 +30,7 @@ export default function calculateCols (
   const calculateActualCols = (isMobile: boolean): void => {
     actualColWidth.value = colWidth.value
     actualCols.value = 1
-    const parentWidth = document.querySelector('.vue3-waterfall-wrapper')?.parentElement?.offsetWidth || 0
+    const parentWidth = document.querySelector(selector)?.parentElement?.offsetWidth || 0
     if (isMobile && parentWidth < (colWidth.value * 2) + mobileGap.value) {
       actualColWidth.value = parentWidth - (2 * mobileGap.value)
       colsTop.value = Array(actualCols.value).fill(0)

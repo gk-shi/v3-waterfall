@@ -10,6 +10,7 @@ type Layout = {
 
 /**
  * @description: 排版
+ * @param {String} selector 瀑布流单个元素选择器
  * @param {Ref<unknown[]>} list 原始列表
  * @param {Ref<number>} actualColWidth 实际列宽
  * @param {Ref<ListItem[]>} actualList 添加排版数据后的列表
@@ -19,6 +20,7 @@ type Layout = {
  * @return {Layout}
  */
 export default function layout (
+  selector: string,
   list: Ref<unknown[]>,
   actualColWidth: Ref<number>,
   actualList: Ref<ListItem[]>,
@@ -36,7 +38,7 @@ export default function layout (
   const wrapperHeight = ref(0)
   // 布局-调整位置
   const layoutHandle = (colsTop: Ref<Array<number>>): void => {
-    const waterfallItems = document.querySelectorAll('.waterfall-item') as NodeListOf<HTMLElement>
+    const waterfallItems = document.querySelectorAll(selector) as NodeListOf<HTMLElement>
     if (waterfallItems.length === 0) return
     // 只对新的未排版的元素进行排版，优化性能
     let idx = lastLayoutImgIdx + 1

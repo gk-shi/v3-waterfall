@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="vue3-waterfall-wrapper" :style="{
+    <div :id="wrapperId" class="vue3-waterfall-wrapper" :style="{
         height: wrapperHeight + 'px',
         width: wrapperWidth + 'px',
       }">
-      <div class="waterfall-item" :style="item.styles || { width: actualColWidth + 'px' }"
+      <div :class="['waterfall-item', itemClass]" :style="item.styles || { width: actualColWidth + 'px' }"
         v-for="(item, idx) of actualList" :key="'w' + idx">
         <slot :item="item" :raw="list[idx]"></slot>
       </div>
@@ -16,6 +16,7 @@
         </div>
       </div>
     </slot>
+    <div v-if="!isOver" :id="anchorId" class="bottom-anchor" :style="{ height: distanceToScroll + 'px' }"></div>
     <slot v-if="isOver" name="footer">
       <div class="waterfall-over-message">呀，被看光了！</div>
     </slot>
@@ -24,7 +25,7 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/ban-types */
-import { computed, defineComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
 import { calculateCols, imagePreload, layout } from './composable'
 
@@ -94,6 +95,11 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     const { srcKey, bottomGap, distanceToScroll, scrollBodySelector, errorImgSrc } = props
 
+    // 唯一id
+    const timestamp = Date.now()
+    const anchorId = 'anchor' + timestamp
+    const wrapperId = 'wrapper' + timestamp
+    const itemClass = 'item' + timestamp
 
     // 是否为手机端
     let isMobile = getDevice(navigator.userAgent) === 'mobile'
@@ -104,7 +110,7 @@ export default defineComponent({
       actualCols,
       colsTop,
       calculateActualCols
-    } = calculateCols(colWidth, gap, mobileGap)
+    } = calculateCols(`#${wrapperId}`, colWidth, gap, mobileGap)
 
 
     const {
@@ -118,7 +124,7 @@ export default defineComponent({
       wrapperHeight,
       setLastLayoutImgIdx,
       layoutHandle
-    } = layout(list, actualColWidth, actualList, actualCols, actualGap, bottomGap)
+    } = layout(`.${itemClass}`, list, actualColWidth, actualList, actualCols, actualGap, bottomGap)
 
 
     // 容器实际宽度
@@ -128,6 +134,14 @@ export default defineComponent({
     // 加载状态
     const actualLoading = computed(() => {
       return isLoading.value || actualList.value.length !== list.value.length
+    })
+
+    watch(actualLoading, (newV) => {
+      if (!newV) {
+        setTimeout(() => {
+          checkAnchorIsHidden()
+        }, 100)
+      }
     })
 
     // 进行瀑布流计算
@@ -150,27 +164,48 @@ export default defineComponent({
     onDeactivated(() => (isActive = false))
 
 
-    // 滚动
-    let scrollElement: Window | HTMLElement = window
-    let body = document.documentElement || document.body
-    let scrollTimeoutHandle: number
-    const scrollFn = (): void => {
-      if (actualLoading.value || isOver.value || !isActive) return
-      const [scrollHeight, scrollTop, clientHeight] = [body.scrollHeight, body.scrollTop, body.clientHeight]
-      if (scrollHeight - scrollTop - clientHeight <= distanceToScroll) {
-        clearTimeout(scrollTimeoutHandle)
-        scrollTimeoutHandle = setTimeout(() => {
+    // 使用 IntersectionObserver
+    let scrollElement: null | HTMLElement = null
+    let intersectionObserver: IntersectionObserver
+    function observer () {
+      intersectionObserver = new IntersectionObserver((entries) => {
+        // 如果 intersectionRatio 为 0，则目标在视野外，
+        // 我们不需要做任何事情。
+        if (entries[0].intersectionRatio <= 0) return
+        if (actualLoading.value || isOver.value || !isActive) return
+        emit('scroll-reach-bottom')
+      }, {
+        root: scrollElement
+      })
+      // 开始监听
+      intersectionObserver.observe(document.getElementById(anchorId) as HTMLElement)
+    }
+
+    // 校验加载一次数据后底部锚点元素是否隐藏，没隐藏还需要再加载一次数据
+    function checkAnchorIsHidden () {
+      if (isOver.value) return
+      const viewport = scrollElement || document.documentElement || document.body
+      const anchorElement = document.getElementById(anchorId) as HTMLElement
+      const anchorTop = anchorElement.getBoundingClientRect().top
+      if (!scrollElement) {
+        if (anchorTop <= viewport.clientHeight) {
           emit('scroll-reach-bottom')
-        }, 200)
+        }
+      } else {
+        const viewportTop = viewport.getBoundingClientRect().top
+        const viewportClientHeight = viewport.clientHeight
+        if (anchorTop - viewportTop <= viewportClientHeight) {
+          emit('scroll-reach-bottom')
+        }
       }
     }
+
 
     // 如果滚动事件是绑定在非 window 对象上使用
     watch(isMounted, (newV: boolean) => {
       if (scrollBodySelector && newV) {
-        scrollElement.removeEventListener('scroll', scrollFn)
-        scrollElement = body = document.querySelector(scrollBodySelector) as HTMLElement
-        scrollElement.addEventListener('scroll', scrollFn)
+        scrollElement = document.querySelector(scrollBodySelector) as HTMLElement
+        observer()
       }
     })
 
@@ -219,17 +254,24 @@ export default defineComponent({
         firstOrReset()
       }
       window.addEventListener('resize', resizeHandle)
-      scrollElement.addEventListener('scroll', scrollFn)
+      if (!scrollBodySelector) {
+        nextTick(() => {
+          observer()
+        })
+      }
     })
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', resizeHandle)
-      scrollElement.removeEventListener('scroll', scrollFn)
+      intersectionObserver.disconnect()
     })
 
     const reRender = firstOrReset  // 暴露给外部的重渲染方法
 
     return {
+      anchorId,
+      wrapperId,
+      itemClass,
       isMobile,
       wrapperWidth,
       wrapperHeight,
