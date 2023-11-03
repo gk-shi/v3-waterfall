@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ref, ref, nextTick } from 'vue'
-import { _image } from '../utils/errorImgBase64'
+// eslint-disable-next-line camelcase
+import { _v3_image } from '../utils/errorImgBase64'
 
 export type ListItem = Record<string, any>
 type ImagePreload = {
@@ -62,11 +63,12 @@ export default function imagePreload (): ImagePreload {
     }
     while (tmpIdx < noPreloadList.length) {
       const item = noPreloadList[tmpIdx]
+      item._v3_hash_id = hash()
       tmpArr.push(item)
       tmpIdx++
       if (!item[srcKey]) {
         lastPreloadImgIdx++
-        item._height = 0
+        item._v3_height = 0
         continue
       }
 
@@ -76,7 +78,7 @@ export default function imagePreload (): ImagePreload {
         if ((e as Event).type === 'error') {
           errorItems.push(item)
         } else if ((e as Event).type === 'load') {
-          item._height = Math.round(actualColWidth.value / (oImg.width / oImg.height))
+          item._v3_height = Math.round(actualColWidth.value / (oImg.width / oImg.height))
         }
         lastPreloadImgIdx++
         if (lastPreloadImgIdx + 1 === noPreloadList.length) {
@@ -107,12 +109,12 @@ export default function imagePreload (): ImagePreload {
     const setErrorImg = (src: string, height: number): void => {
       errorItems.forEach(item => {
         item[srcKey] = src
-        item._height = height
+        item._v3_height = height
       })
     }
     // 用户没有添加错误图片
     if (!errorImgSrc) {
-      setErrorImg(_image, colWidth.value)
+      setErrorImg(_v3_image, colWidth.value)
       render && render()
       return
     }
@@ -122,7 +124,7 @@ export default function imagePreload (): ImagePreload {
     errImg.onload = errImg.onerror = (e): void => {
       if ((e as Event).type === 'error') {
         // 用户的图片加载失败，使用内置错误图片
-        setErrorImg(_image, colWidth.value)
+        setErrorImg(_v3_image, colWidth.value)
         render && render()
       } else if ((e as Event).type === 'load') {
         const height = Math.round(colWidth.value / (errImg.width / errImg.height))
@@ -139,4 +141,9 @@ export default function imagePreload (): ImagePreload {
     setLastPreloadImgIdx,
     imagePreloadHandle
   }
+}
+
+
+function hash () {
+  return `${Date.now()}-${Math.random()}`
 }
