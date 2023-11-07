@@ -4,9 +4,9 @@
         height: wrapperHeight + 'px',
         width: wrapperWidth + 'px',
       }">
-      <div :class="['waterfall-item', itemClass]" :style="item.styles || { width: actualColWidth + 'px' }"
-        v-for="(item, idx) of actualList" :key="'w' + idx">
-        <slot :item="item" :raw="list[idx]"></slot>
+      <div :class="['waterfall-item', itemClass]" :style="item._v3_styles || { width: actualColWidth + 'px' }"
+        v-for="(item, idx) of actualList" :key="item._v3_hash_id">
+        <slot v-if="!item._v3_hidden" :item="item" :raw="list[idx]"></slot>
       </div>
     </div>
     <slot v-if="actualLoading && !isOver" name="loading">
@@ -25,9 +25,9 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/ban-types */
-import { computed, defineComponent, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, toRefs, watch } from 'vue'
+import { computed, defineComponent, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
-import { calculateCols, imagePreload, layout } from './composable'
+import { calculateCols, imagePreload, layout, virtualFilter } from './composable'
 
 
 export default defineComponent({
@@ -88,12 +88,20 @@ export default defineComponent({
     errorImgSrc: { // 图片加载失败时默认展示的图片
       type: String,
       default: ''
+    },
+    virtualTime: { // 虚拟列表的触发间隔, 默认为 0 时，不做虚拟列表
+      type: Number,
+      default: 0
+    },
+    virtualLength: { // 元素隐藏时距离视窗的距离
+      type: Number,
+      default: 500
     }
   },
   setup (props, { emit }) {
     const { colWidth, gap, mobileGap, list, isLoading, isOver, isMounted } = toRefs(props)
     // eslint-disable-next-line vue/no-setup-props-destructure
-    const { srcKey, bottomGap, distanceToScroll, scrollBodySelector, errorImgSrc } = props
+    const { srcKey, bottomGap, scrollBodySelector, errorImgSrc, virtualTime, virtualLength } = props
 
     // 唯一id
     const timestamp = Date.now()
@@ -159,9 +167,15 @@ export default defineComponent({
     // 兼容滚动事件绑定在 window 上，
     // 并且页面被 keep-alive 缓存时滚动穿越的情形
     // (a 页面绑定滚动被缓存，b 页面滚动会影响 a 页面的监听)
-    let isActive = true
-    onActivated(() => (isActive = true))
-    onDeactivated(() => (isActive = false))
+    const isActive = ref(true)
+    onActivated(() => (isActive.value = true))
+    onDeactivated(() => (isActive.value = false))
+
+
+    const {
+      bind,
+      unbind
+    } = virtualFilter(actualList, isActive, virtualTime, virtualLength)
 
 
     // 使用 IntersectionObserver
@@ -172,7 +186,7 @@ export default defineComponent({
         // 如果 intersectionRatio 为 0，则目标在视野外，
         // 我们不需要做任何事情。
         if (entries[0].intersectionRatio <= 0) return
-        if (actualLoading.value || isOver.value || !isActive) return
+        if (actualLoading.value || isOver.value || !isActive.value) return
         emit('scroll-reach-bottom')
       }, {
         root: scrollElement
@@ -205,6 +219,7 @@ export default defineComponent({
     watch(isMounted, (newV: boolean) => {
       if (scrollBodySelector && newV) {
         scrollElement = document.querySelector(scrollBodySelector) as HTMLElement
+        bind(scrollElement)
         observer()
       }
     })
@@ -256,6 +271,7 @@ export default defineComponent({
       window.addEventListener('resize', resizeHandle)
       if (!scrollBodySelector) {
         nextTick(() => {
+          bind(scrollElement)
           observer()
         })
       }
@@ -263,6 +279,7 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', resizeHandle)
+      unbind()
       intersectionObserver.disconnect()
     })
 

@@ -56,10 +56,13 @@ export default function layout (
       // 设置决定定位位置
       const left = actualColWidth.value * minOfColIdx + (minOfColIdx - 1 < 0 ? 0 : minOfColIdx - 1) * actualGap + 'px'
       const top = minHeight + 'px'
-      colsTop.value[minOfColIdx] = colsTop.value[minOfColIdx] + eleHeight + actualList.value[idx]._height + bottomGap
+      colsTop.value[minOfColIdx] = colsTop.value[minOfColIdx] + eleHeight + actualList.value[idx]._v3_height + bottomGap
       const marginLeft = actualCols.value !== 1 && minOfColIdx !== 0 ? actualGap + 'px' : '0'
+      // 该变量作用：判断在虚拟列表开启时该 item 是否需要渲染
+      actualList.value[idx]._v3_top = minHeight
+      actualList.value[idx]._v3_bottom = colsTop.value[minOfColIdx] - bottomGap
       // 一次修改，减少重排
-      actualList.value[idx].styles = {
+      actualList.value[idx]._v3_styles = {
         width: actualColWidth.value + 'px',
         left,
         top,

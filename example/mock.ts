@@ -135,6 +135,6 @@ export async function getData (): Promise<unknown[]> {
     const ret = [...data, ...data]
     setTimeout(() => {
       resolve(ret)
-    }, 2000)
+    }, 100)
   })
 }
