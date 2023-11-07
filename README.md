@@ -75,7 +75,7 @@ createApp(App)
 ```
 
 
-> 注意：首次加载的数据必须达到可以出现滚动的条件
+> 注意：尽管做了需要多次加载的校验，但首次加载的数据尽量达到可以出现滚动的条件
 
 
 更为完整的基本示例在`example/App.vue`中有具体代码，同时本项目`yarn dev`运行起来的项目即能看到效果。
@@ -100,11 +100,14 @@ createApp(App)
 | scrollBodySelector |  String  |            -             | 绑定滚动父元素选择器，默认为`window`对象，与`isMounted`参数配合使用 |
 |     isMounted      | Boolean  |          false           |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
 |    errorImgSrc     |  String  |            -             |                 图片加载失败时展示的图片地址                 |
+| virtualTime | Number | 0 | 触发虚拟列表校验时间间隔，0 默认不开启虚拟列表 |
+| virtualLength | Number | 500 | 默认移出视窗距离开启虚拟隐藏，单位: px |
 | scrollReachBottom  | Function |            -             |                     触发加载更多时的函数                     |
 | reRender  | Function |            -             |                     通过 ref 可直接调用该组件方法进行重载                     |
 
-
 #### 3.1 特殊字段说明
+
+- `scrollBodySelector`和`isMounted`
 
 有时候我们的滚动不是相对于`window`对象，而是某个单独的父元素，这需要`scrollBodySelector`和`isMounted`字段配合。
 
@@ -137,13 +140,27 @@ createApp(App)
 
 由于子组件的`mounted`生命周期比父组件`mounted`先执行，所以需要通过父组件主动通知已挂载完成后，子组件才能往`div.father-box`元素上添加滚动监听等事件。
 
+&nbsp;
+
+- `virtualTime`和`virtualLength`
+
+提供数据量过大时的虚拟列表支持，如果数量不多，可以不开启。`virtualTime`是开启虚拟列表的关键，配置的是滚动事件发生后多久进行虚拟列表的计算，默认值为 0 ，此时不开启虚拟列表。如果需要使用，建议设置≥400的值。
+
+`virtualLength`指的是当一个元素随着滚动消失在视窗外(可能消失在上方、下方)的距离需要被隐藏。
+
+**由于本组件需要预渲染进行位置排版计算，所以该虚拟列表表现稍有不同，可以参考[#18](https://github.com/gk-shi/v3-waterfall/issues/18)说明。**
 
 &nbsp;
+
+
+
 ### 4.slot插槽
 
 #### 4.1 默认插槽(v-slot:default)
 
-瀑布流卡片展示内容，完全自主定义，展示什么，添加什么事件，完全可扩展。
+瀑布流卡片展示内容，自定义，展示什么，添加什么事件，可扩展。
+
+**注：目前只支持使用一个 img 标签进行封面加载**
 
 
 
@@ -155,4 +172,4 @@ createApp(App)
 
 #### 4.3 底部插槽(v-slot:footer)
 
-数据全部加载完之后再底部显示的内容，默认为`呀，被看光了！`。
+数据全部加载完之后在底部显示的内容，默认为`呀，被看光了！`。
