@@ -182,6 +182,7 @@ export default defineComponent({
     let scrollElement: null | HTMLElement = null
     let intersectionObserver: IntersectionObserver
     function observer () {
+      intersectionObserver && intersectionObserver.disconnect()
       intersectionObserver = new IntersectionObserver((entries) => {
         // 如果 intersectionRatio 为 0，则目标在视野外，
         // 我们不需要做任何事情。
@@ -194,6 +195,15 @@ export default defineComponent({
       // 开始监听
       intersectionObserver.observe(document.getElementById(anchorId) as HTMLElement)
     }
+
+    // 防止一种 case：当底部 anchor 最开始没有渲染，切换到渲染时， observer 初始并没有观察到 anchor
+    watch(isOver, (newV, oldV) => {
+      if (!newV && oldV) {
+        nextTick(() => {
+          observer()
+        })
+      }
+    })
 
     // 校验加载一次数据后底部锚点元素是否隐藏，没隐藏还需要再加载一次数据
     function checkAnchorIsHidden () {

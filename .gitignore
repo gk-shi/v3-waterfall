@@ -4,3 +4,4 @@ dist
 github-page
 dist-ssr
 *.local
+.vscode
