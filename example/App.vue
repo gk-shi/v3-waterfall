@@ -245,14 +245,14 @@ export default defineComponent({
 }
 
 /* ipad pro */
-@media screen and(max-width: 1024px) {
+@media screen and (max-width: 1024px) {
   header {
     height: 40vh;
     background-size: 100% 100%;
   }
 }
 
-@media screen and(max-width: 1000px) {
+@media screen and (max-width: 1000px) {
   .waterfall,
   .tags {
     width: 100%;
@@ -262,7 +262,7 @@ export default defineComponent({
   }
 }
 
-@media screen and(max-width: 576px) {
+@media screen and (max-width: 576px) {
   header {
     height: 30vh;
     min-height: 300px;
