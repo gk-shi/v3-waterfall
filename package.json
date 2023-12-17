@@ -4,17 +4,12 @@
   "private": false,
   "main": "./dist/v3-waterfall.umd.js",
   "module": "./dist/v3-waterfall.es.js",
+  "types": "./dist/typings/index.d.ts",
   "exports": {
     "./dist/style.css": "./dist/style.css",
     ".": {
-      "import": {
-        "types": "./dist/typings/index.d.ts",
-        "default": "./dist/v3-waterfall.es.js"
-      },
-      "require": {
-        "types": "./dist/typings/index.d.ts",
-        "default": "./dist/v3-waterfall.umd.js"
-      }
+      "import": "./dist/v3-waterfall.es.js",
+      "require": "./dist/v3-waterfall.umd.js"
     }
   },
   "files": [

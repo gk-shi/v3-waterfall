@@ -1,11 +1,13 @@
-import { App, Plugin } from 'vue'
+import { App } from 'vue'
 import V3waterfall from './v3-waterfall.vue'
 
+export { V3waterfall }
 
-V3waterfall.install = function (app: App) {
-  app.component(V3waterfall.name, V3waterfall)
-
-  return app
+const V3waterfallInstance = {
+  install: (app: App): App => {
+    app.component(V3waterfall.name, V3waterfall)
+    return app
+  }
 }
 
-export default V3waterfall as typeof V3waterfall & Plugin
+export default V3waterfallInstance
