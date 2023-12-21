@@ -1,5 +1,5 @@
-import calculateCols from './calculateCols'
-import imagePreload from './imagePreload'
+import calculateCols from './initColumnsAndColWidth'
+import imagePreload from './initImagePreload'
 import layout from './layout'
 import virtualFilter from './virtualFilter'
 

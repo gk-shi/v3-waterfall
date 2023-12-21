@@ -1,25 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ref, ref, nextTick } from 'vue'
 // eslint-disable-next-line camelcase
 import { _v3_image } from '../utils/errorImgBase64'
 
-export type ListItem = Record<string, any>
-type ImagePreload = {
-  actualList: Ref<ListItem[]>;
-  setLastPreloadImgIdx: (idx: number) => void;
-  setActualList: (newList: ListItem[]) => void;
-  imagePreloadHandle: (
-    noPreloadList: ListItem[],
-    actualColWidth: Ref<number>,
-    preloadedFn: () => unknown | undefined,
-    srcKey: string,
-    errorImgSrc: string
-  ) => void;
+type InitImagePreload<T extends object> = {
+  actualList: Ref<ActualList<T>>
+  setLastPreloadImgIdx: (idx: number) => void
+  setActualList: (newList: ActualList<T>) => void
+  imagePreloadHandler: (
+    noPreloadList: ActualList<T>,
+    preloadedFn: () => unknown | undefined | void
+  ) => void
 }
 
-export default function imagePreload (): ImagePreload {
-  const actualList = ref<ListItem[]>([])  // 实际用来渲染的列表
-  const setActualList = (newList: ListItem[]): void => {
+export default function initImagePreload <T extends object>(
+  actualColWidth: Ref<number>,
+  srcKey: string,
+  errorImgSrc: string
+): InitImagePreload<T> {
+  const actualList = ref<ActualList<T>>([]) as Ref<ActualList<T>>  // 实际用来渲染的列表
+  const setActualList = (newList: ActualList<T>): void => {
     actualList.value = newList
   }
 
@@ -41,17 +40,14 @@ export default function imagePreload (): ImagePreload {
    * @param {string} errorImgSrc 图片加载失败时默认图片地址
    * @return {void}
    */
-  function imagePreloadHandle (
-    noPreloadList: ListItem[],
-    actualColWidth: Ref<number>,
-    preloadedFn: () => unknown | undefined,
-    srcKey: string,
-    errorImgSrc: string
+  function imagePreloadHandler (
+    noPreloadList: ActualList<T>,
+    preloadedFn: () => unknown | undefined | void,
   ): void {
-    const errorItems: ListItem[] = []  // 存放图片加载失败的项，等待最后加载错误图片
+    const errorItems: ActualList<T> = []  // 存放图片加载失败的项，等待最后加载错误图片
 
     let tmpIdx = lastPreloadImgIdx + 1
-    const tmpArr: ListItem[] = []
+    const tmpArr: ActualList<T> = []
 
     const render = () => {
       // 预加载完成，开始渲染
@@ -63,12 +59,13 @@ export default function imagePreload (): ImagePreload {
     }
     while (tmpIdx < noPreloadList.length) {
       const item = noPreloadList[tmpIdx]
-      item._v3_hash_id = hash()
+      !item._v3_waterfall && (item._v3_waterfall = {})
+      item._v3_waterfall._v3_hash_id = hash()
       tmpArr.push(item)
       tmpIdx++
       if (!item[srcKey]) {
         lastPreloadImgIdx++
-        item._v3_height = 0
+        item._v3_waterfall._v3_height = 0
         continue
       }
 
@@ -78,7 +75,7 @@ export default function imagePreload (): ImagePreload {
         if ((e as Event).type === 'error') {
           errorItems.push(item)
         } else if ((e as Event).type === 'load') {
-          item._v3_height = Math.round(actualColWidth.value / (oImg.width / oImg.height))
+          item._v3_waterfall._v3_height = Math.round(actualColWidth.value / (oImg.width / oImg.height))
         }
         lastPreloadImgIdx++
         if (lastPreloadImgIdx + 1 === noPreloadList.length) {
@@ -97,7 +94,7 @@ export default function imagePreload (): ImagePreload {
     colWidth: Ref<number>,
     srcKey: string,
     errorImgSrc: string,
-    errorItems: ListItem[],
+    errorItems: ActualList<T>,
     render?: () => void
   ): void {
     if (errorItems.length === 0) {
@@ -109,7 +106,7 @@ export default function imagePreload (): ImagePreload {
     const setErrorImg = (src: string, height: number): void => {
       errorItems.forEach(item => {
         item[srcKey] = src
-        item._v3_height = height
+        item._v3_waterfall._v3_height = height
       })
     }
     // 用户没有添加错误图片
@@ -139,7 +136,7 @@ export default function imagePreload (): ImagePreload {
     actualList,
     setActualList,
     setLastPreloadImgIdx,
-    imagePreloadHandle
+    imagePreloadHandler
   }
 }
 

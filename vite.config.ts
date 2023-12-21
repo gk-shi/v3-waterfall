@@ -1,31 +1,16 @@
+import { fileURLToPath, URL } from 'node:url'
+
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
-
-const target = process.env.TARGET
-let buildConfig: Record<string, unknown> = {
-  lib: {
-    entry: path.resolve(__dirname, 'lib/index.ts'),
-    name: 'v3-waterfall'
-  },
-  rollupOptions: {
-    external: ['vue'],
-    output: {
-      globals: {
-        vue: 'Vue'
-      }
-    }
-  }
-}
-
-if (target === 'page') {
-  buildConfig = {
-    outDir: 'github-page'
-  }
-}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  build: { ...buildConfig },
-  plugins: [vue()]
+  plugins: [
+    vue(),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  }
 })

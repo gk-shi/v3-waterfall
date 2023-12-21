@@ -1,6 +1,6 @@
 import { Ref } from 'vue'
 import Emitter from '../utils/ScrollEmitter'
-import { ListItem } from './imagePreload'
+import { ListItem } from './initImagePreload'
 
 
 type VirtualFilter = {

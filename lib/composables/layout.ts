@@ -1,11 +1,11 @@
 import { Ref, ref } from 'vue'
-import { ListItem } from './imagePreload'
+import { ListItem } from './initImagePreload'
 
 
 type Layout = {
   wrapperHeight: Ref<number>;
   setLastLayoutImgIdx: (idx: number) => void;
-  layoutHandle: (colsTop: Ref<number[]>) => void;
+  layoutHandler: (colsTop: Ref<number[]>) => void;
 }
 
 /**
@@ -37,7 +37,7 @@ export default function layout (
 
   const wrapperHeight = ref(0)
   // 布局-调整位置
-  const layoutHandle = (colsTop: Ref<Array<number>>): void => {
+  const layoutHandler = (colsTop: Ref<Array<number>>): void => {
     const waterfallItems = document.querySelectorAll(selector) as NodeListOf<HTMLElement>
     if (waterfallItems.length === 0) return
     // 只对新的未排版的元素进行排版，优化性能
@@ -77,7 +77,7 @@ export default function layout (
   return {
     wrapperHeight,
     setLastLayoutImgIdx,
-    layoutHandle
+    layoutHandler
   }
 }
 

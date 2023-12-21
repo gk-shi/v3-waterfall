@@ -3,8 +3,22 @@
  * @param {string} userAgent window.userAgent
  * @return {string} mobile/ipad/pc
  */
-export function getDevice (userAgent: string): string {
-  return /(Android|iPhone|iPod|iOS|SymbianOS|Windows Phone)/ig.test(userAgent) ? 'mobile' : /iPad/ig.test(userAgent) ? 'ipad' : 'pc'
+export function getDevice(userAgent?: string): Device {
+  userAgent = userAgent || window.navigator.userAgent
+  return /(Android|iPhone|iPod|iOS|SymbianOS|Windows Phone)/gi.test(userAgent)
+    ? 'mobile'
+    : /iPad/gi.test(userAgent)
+      ? 'ipad'
+      : 'pc'
+}
+
+
+/**
+ * @description: 是否为手机
+ * @return {boolean}
+ */
+export function isMobile (): boolean {
+  return getDevice() === 'mobile'
 }
 
 /**
@@ -12,7 +26,8 @@ export function getDevice (userAgent: string): string {
  * @param {number} width 要判断的最大宽度
  * @return {boolean} 屏幕宽度是否小于等于 width
  */
-export function screenMaxIs (width: number): boolean {
+export function screenMaxIs(width: number): boolean {
   return window.screen.width <= width
 }
 
+export type Device = 'mobile' | 'ipad' | 'pc'

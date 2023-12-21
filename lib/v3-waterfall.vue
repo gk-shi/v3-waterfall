@@ -27,7 +27,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { computed, defineComponent, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, toRefs, watch } from 'vue'
 import { getDevice } from './utils'
-import { calculateCols, imagePreload, layout, virtualFilter } from './composable'
+import { calculateCols, imagePreload, layout, virtualFilter } from './composables'
 
 
 export default defineComponent({
@@ -243,7 +243,7 @@ export default defineComponent({
       setLastPreloadImgIdx(-1)
       setLastLayoutImgIdx(-1)
       setActualList([])
-      calculateActualCols(isMobile)
+      calculateActualCols()
       waterfall(list.value as T[])
     }
 
@@ -258,7 +258,7 @@ export default defineComponent({
 
     const documentBody = document.documentElement || document.body
     // resize 时的 handle
-    let timeHandler: number
+    let timeHandler: NodeJS.Timeout
     let lastClientWidth = documentBody.offsetWidth
     const resizeHandle = (): void => {
       const clientWidth = documentBody.offsetWidth
