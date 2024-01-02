@@ -30,4 +30,14 @@ export function screenMaxIs(width: number): boolean {
   return window.screen.width <= width
 }
 
+
+/**
+ * @description: 判断是否为 number 类型
+ * @param {any} attr
+ * @return {boolean}
+ */
+export function isNumber(attr: any): attr is number {
+  return typeof attr === 'number'
+}
+
 export type Device = 'mobile' | 'ipad' | 'pc'

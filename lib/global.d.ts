@@ -15,3 +15,5 @@ interface V3WaterfallObject {
 type ActualItemOfList<T extends object> = T & V3WaterfallObject
 
 type ActualList<T extends object> = ActualItemOfList<T>[]
+
+type WaterfallList<T = any> = T[]
