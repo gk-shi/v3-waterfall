@@ -22,22 +22,20 @@
     <div v-if="!isOver" :id="anchorID" class="bottom-anchor" :style="{ height: distanceToScroll + 'px' }"></div>
     <!-- 加载完 slot 区域 -->
     <slot v-if="isOver" name="footer">
-      <div class="waterfall-over-message">呀，被看光了！</div>
+      <div class="waterfall-over-message">{{ overText }}</div>
     </slot>
   </div>
 </template>
 
 <script lang="ts" setup generic="T extends object">
 import { toRefs } from 'vue'
-import useUniqueID from './composables/useUniqueId'
-import { _v3_error_image } from './utils/errorImgBase64'
+import { useUniqueID, useColumnsAndTop } from './composables'
+import { isNumber } from './utils'
 
 // 定义组件需要暴露的名字
 defineOptions({ name: 'v3-waterfall' })
 
-const { wrapperID, anchorID, itemClass } = useUniqueID()
-
-const props = withDefaults(defineProps<V3WaterfallProps>(), {
+const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   list: () => [],
   colWidth: 250,
   srcKey: 'src',
@@ -47,39 +45,92 @@ const props = withDefaults(defineProps<V3WaterfallProps>(), {
   isOver: false,
   dotsCount: 5,
   dotsColor: 'rgba(169, 169, 169, 0.8)',
+  overText: '呀，被看光了！',
+  overColor: '#999999',
   distanceToScroll: 200,
-  errorImgSrc: _v3_error_image,
+  errorImgSrc: '',
   scrollBodySelector: '',
   isMounted: false,
-  virtualTime: 400,
+  virtualTime: 0,
   virtualLength: 500
 })
 
-const { colWidth, srcKey, gap, bottomGap, dotsCount, dotsColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtualTime, virtualLength } = props
+const { colWidth, srcKey, gap, bottomGap, dotsCount, dotsColor, overText, overColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtualTime, virtualLength } = props
+const finalGap = isNumber(gap) ? gap : gap()
+const finalWidth = isNumber(colWidth) ? colWidth : colWidth()
+
 // 这几个值需要保持响应式
 const { list, isLoading, isOver, isMounted } = toRefs(props)
 
+const { wrapperID, anchorID, itemClass } = useUniqueID()
 
-// 定义 props 类型
-export interface V3WaterfallProps {
-  list: WaterfallList<T> // 元数据列表
-  colWidth: number | (() => number) // 列宽
-  srcKey: string | string[] // 图片地址的键值，数组支持多个键值
-  gap: number | (() => number) // 两列间的间隔，单位：px
-  bottomGap: number | (() => number) // 上下元素的间距，单位：px
-  isLoading: boolean // 是否正在加载
-  isOver: boolean // 是否结束（所有数据加载完）
-  dotsCount: number // 底部加载中状态点的数量
-  dotsColor: string // 底部加载中状态点的颜色
-  distanceToScroll: number // 底部触发加载的距离，单位：px
-  errorImgSrc: string // 图片加载失败时默认展示的替换图片
-  scrollBodySelector: string // 滚动主体选择器，默认为页面
-  isMounted: boolean // 父组件是否加载完成，和 scrollBodySelector 配合使用
-  virtualTime: number // 虚拟列表的触发间隔, 为 0 时不做虚拟列表
-  virtualLength: number // 元素隐藏时距离视窗的距离
-}
+const { columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop } = useColumnsAndTop(`${#wrapperID}`, finalWidth, finalGap)
+
+// 每个元素与之生成的内部属性
+const innerWeakMap = new WeakMap<T, V3WaterfallInnerProperty>()
+
+
+
 </script>
 
 <style scoped>
+.vue3-waterfall-wrapper {
+  width: 100%;
+  position: relative;
+  margin: 0 auto;
+}
 
+.waterfall-item {
+  visibility: hidden;
+  position: absolute;
+  /* transition: all 0.3s;
+  animation: scaleItem 0.3s linear forwards; */
+}
+
+.waterfall-over-message {
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  color: v-bind(overColor);
+}
+
+.dot-wrapper {
+  padding: 10px 0;
+  text-align: center;
+}
+
+.dot-wrapper > .dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: v-bind(dotsColor);
+  margin: 0 2px;
+  }
+
+.dot-wrapper > .dot:nth-of-type(2n) {
+  animation: dotScale 0.4s linear infinite alternate;
+}
+
+.dot-wrapper > .dot:nth-of-type(2n - 1) {
+  animation: dotScale 0.4s linear 0.4s infinite alternate;
+}
+
+@keyframes dotScale {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.5);
+  }
+}
+
+@keyframes scaleItem {
+  0% {
+    transform: scale(0.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 </style>

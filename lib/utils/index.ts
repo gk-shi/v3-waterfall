@@ -40,4 +40,13 @@ export function isNumber(attr: any): attr is number {
   return typeof attr === 'number'
 }
 
+/**
+ * @description: 判断是否为 string 类型
+ * @param {any} attr
+ * @return {boolean}
+ */
+export function isString(attr: any): attr is string {
+  return typeof attr === 'string'
+}
+
 export type Device = 'mobile' | 'ipad' | 'pc'
