@@ -15,8 +15,9 @@ export default function useImagesPreload<T extends object>(
   noPreloadList: WaterfallList<T>,
   srcKey: string | string[],
   errorImgSrc: string,
-  callback: () => void
+  callback?: (list: WaterfallList<T>) => void
 ) {
+  if (!noPreloadList.length) return
   const srcKeys = (isString(srcKey) ? [srcKey] : srcKey).filter(s => s)
 
   // 有一张错误状态图片需要预加载
@@ -33,7 +34,7 @@ export default function useImagesPreload<T extends object>(
     preloadCount++
 
     if (preloadCount === shouldPreloadCount) {
-      callback && callback()
+      callback && callback(noPreloadList)
     }
   }
   errorImg.src = errSrc
@@ -53,7 +54,7 @@ export default function useImagesPreload<T extends object>(
         }
         preloadCount++
         if (preloadCount === shouldPreloadCount) {
-          callback && callback()
+          callback && callback(noPreloadList)
         }
       }
     })
