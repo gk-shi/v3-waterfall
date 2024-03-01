@@ -7,11 +7,11 @@
     }">
       <div
         v-for="(item, idx) of displayList"
-        :key="innerWeakMap.get(item)._v3_hash"
+        :key="getItemProperty(item)._v3_hash"
         :class="['waterfall-item', itemClass]"
-        :style="innerWeakMap.get(item)._v3_styles || { width: finalWidth + 'px' }"
+        :style="getItemProperty(item)._v3_styles || {}"
       >
-        <slot :item="item" :position="innerWeakMap.get(item)._v3_position"></slot>
+        <slot :item="item" :position="getItemProperty(item)._v3_position"></slot>
       </div>
     </div>
     <!-- loading slot 区域 -->
@@ -32,8 +32,9 @@
 </template>
 
 <script lang="ts" setup generic="T extends object">
-import { Ref, onMounted, toRefs, ref } from 'vue'
-import { useUniqueID, useColumnsAndTop, useImagesPreload, useLayout } from './composables'
+import { Ref, onMounted, toRefs, ref, watch, useSlots } from 'vue'
+import { useUniqueID, useColumnsAndTop, useLayout } from './composables'
+import type { V3WaterfallProps, V3WaterfallInnerProperty, WaterfallList } from './global.d'
 
 // 定义组件需要暴露的名字
 defineOptions({ name: 'v3-waterfall' })
@@ -60,38 +61,40 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   errorImgSrc: '', // 图片加载失败时默认展示的替换图片
   scrollBodySelector: '', // 滚动主体选择器，默认为页面
   isMounted: false, // 父组件是否加载完成，和 scrollBodySelector 配合使用
-  virtualTime: 0, // 虚拟列表的触发间隔, 为 0 时不做虚拟列表
+  virtual: true, // 是否开启虚拟列表
   virtualLength: 500, // 元素隐藏时距离视窗的距离
   heightHook: null // 用户自定义元素高度计算方式
 })
 
-const { colWidth, srcKey, gap, bottomGap, dotsCount, dotsColor, overText, overColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtualTime, virtualLength, heightHook } = props
+const { colWidth, gap, bottomGap, dotsCount, dotsColor, overText, overColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtual, virtualLength, heightHook } = props
 
 // 这几个值需要保持响应式
 const { list, isLoading, isOver, isMounted } = toRefs(props)
 
 const { wrapperID, anchorID, itemClass } = useUniqueID()
+const getWidthOfWrapperParent = () => {
+  return document.querySelector(`#${wrapperID}`)?.parentElement?.offsetWidth || 0
+}
 
-const { finalWidth, finalGap, columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop } = useColumnsAndTop(`${#wrapperID}`, colWidth, gap)
+const { finalWidth, finalGap, columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop } = useColumnsAndTop(getWidthOfWrapperParent, colWidth, gap)
 
 // 每个元素与之生成的内部属性
 const innerWeakMap = new WeakMap<T, V3WaterfallInnerProperty>()
+function getItemProperty(item: T) {
+  return innerWeakMap.get(item) || {} as V3WaterfallInnerProperty
+}
 // 列号 -> 元素列表
 const colToListMap = new Map<string | number, WaterfallList<T>>()
 
-const { wrapperHeight, layout } = useLayout(innerWeakMap, colToListMap, topOfEveryColumn, bottomGap, finalWidth, finalGap, heightHook)
+const slots = useSlots()
+const { wrapperHeight, layout } = useLayout(innerWeakMap, colToListMap, topOfEveryColumn, bottomGap, finalWidth, finalGap, errorImgSrc, slots, heightHook)
 
 const displayList = ref<WaterfallList<T>>([]) as Ref<WaterfallList<T>>
 
-const preloadedHook = (preloadedList: WaterfallList<T>) => {
-  layout(preloadedList, () => {
-    // TODO 虚拟列表计算
-    displayList.value = list.value
-  })
-}
-
-const waterfall = (noLayoutedList: WaterfallList<T>) => {
-  useImagesPreload(noLayoutedList, srcKey, errorImgSrc, preloadedHook)
+const waterfall = async (noLayoutedList: WaterfallList<T>) => {
+  await layout(noLayoutedList)
+  // TODO 虚拟列表计算
+  displayList.value = list.value
 }
 
 const init = () => {
@@ -99,8 +102,21 @@ const init = () => {
   waterfall(list.value)
 }
 
+watch(list, () => {
+  init()
+})
+
 onMounted(() => {
   init()
+})
+
+
+const test = ref([])
+// @ts-ignore
+window.test = test
+watch(test, (newV, oldV) => {
+  console.log('newV = ', newV)
+  console.log('oldV = ', oldV)
 })
 
 </script>
@@ -112,12 +128,12 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-/* .waterfall-item {
-  visibility: hidden;
+.waterfall-item {
+  /* visibility: hidden; */
   position: absolute;
   transition: all 0.3s;
   animation: scaleItem 0.3s linear forwards;
-} */
+}
 
 .bottom-anchor {
   height: calc(v-bind(distanceToScroll) * 1px);

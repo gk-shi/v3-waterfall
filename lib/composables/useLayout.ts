@@ -1,6 +1,9 @@
 import { Ref, h, ref, render, useSlots } from "vue"
 import { isNumber } from "../utils"
+import { _v3_error_image } from '../utils/errorImgBase64'
+import type { V3WaterfallInnerProperty, WaterfallList, HeightHook } from '../global.d'
 
+type SlotsType = ReturnType<typeof useSlots>
 
 /**
  * @description: 进行分列布局计算
@@ -10,6 +13,8 @@ import { isNumber } from "../utils"
  * @param {number | () => number} bottomGap 底部间隔（计算函数）
  * @param {number} width 元素宽度
  * @param {number} gap 列的间隔
+ * @param {string} errorImgSrc 错误图片地址
+ * @param {SlotsType} slots slots句柄
  * @param {HeightHook} heightHook 元素高度计算钩子
  * @return {Layout} { wrapperHeight, layout }
  */
@@ -20,18 +25,21 @@ export default function useLayout<T extends object>(
   bottomGap: number | (() => number),
   width: Ref<number>,
   gap: Ref<number>,
-  heightHook: HeightHook<T>
+  errorImgSrc: string,
+  slots: SlotsType,
+  heightHook: HeightHook<SlotsType, T>
 ): Layout<T> {
 
   const wrapperHeight = ref(0)
 
   const getHeight = heightHook ? heightHook : innerGetHeight
 
-  const layout = (noLayoutedList: WaterfallList<T>, callback?: () => void) => {
+  const layout = async (noLayoutedList: WaterfallList<T>) => {
     if (!noLayoutedList.length) return
     const finalBottomGap = isNumber(bottomGap) ? bottomGap : bottomGap()
-    noLayoutedList.forEach((item: T) => {
-      const height = getHeight(item, width.value)
+    for (let i = 0; i < noLayoutedList.length; i++) {
+      const item = noLayoutedList[i]
+      const height = await getHeight(slots, item, width.value, errorImgSrc)
 
       const list = topOfEveryColumn.value
       const indexOfMinTop = list.indexOf(Math.min.apply(null, list))
@@ -39,6 +47,7 @@ export default function useLayout<T extends object>(
       list[indexOfMinTop] = topOfThisItem + height + finalBottomGap
 
       const left = (width.value + gap.value) * indexOfMinTop
+
 
       wrapperHeight.value = Math.max.apply(null, list)
 
@@ -52,7 +61,9 @@ export default function useLayout<T extends object>(
       const innerObj = {
         _v3_hash: hash(),
         _v3_styles: {
-          transform: `translate(${left}px, ${topOfThisItem}px)`
+          width: width.value + 'px',
+          left: left + 'px',
+          top: topOfThisItem + 'px'
         },
         _v3_height: height,
         _v3_top: topOfThisItem,
@@ -64,9 +75,7 @@ export default function useLayout<T extends object>(
       }
 
       innerWeakMap.set(item, innerObj)
-    })
-
-    callback && callback()
+    }
   }
 
   return {
@@ -76,19 +85,58 @@ export default function useLayout<T extends object>(
 
 }
 
-function innerGetHeight<T>(item: T, width: number): number {
-  const slots = useSlots()
+async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, errorImgSrc: string): Promise<number> {
   const div = document.createElement('div')
+  div.style.position ='absolute'
+  div.style.left ='-1000px'
   div.style.width = width + 'px'
   div.style.visibility = 'hidden'
 
   render(h(slots.default, { item, index: { col: 1, row: 1 } }), div)
 
+  const imgs = div.querySelectorAll('img')
+  const replaceObj = await loadImg(imgs, errorImgSrc)
+  Object.keys(replaceObj).forEach(k => {
+    item[k] = replaceObj[k]
+  })
+
   const body = document.body || document.documentElement
   body.appendChild(div)
   const height = div.clientHeight
-  body.removeChild(div)
   return height
+}
+
+
+function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise<{}> {
+  return new Promise((resolve, reject) => {
+    const len = imgs.length
+    if (len === 0) resolve({})
+    const key2Src = {}
+    let count = 0
+    imgs.forEach(img => {
+      if (!img.src) {
+        count++
+        if (count === len) resolve(key2Src)
+        return
+      }
+      img.onload = () => {
+        count++
+        if (count === len) resolve(key2Src)
+      }
+      img.onerror = () => {
+        if (img.getAttribute('data-self')) {
+          count++
+          if (count === len) resolve(key2Src)
+          return
+        }
+        img.setAttribute('data-self', 'true')
+        const src = errImgSrc || _v3_error_image
+        img.src = src
+        const key = img.getAttribute('data-key')
+        key2Src[key] = src
+      }
+    })
+  })
 }
 
 
@@ -99,5 +147,5 @@ function hash(): string {
 
 type Layout<T> = {
   wrapperHeight: Ref<number>
-  layout: (list: T[], callback?: () => void) => void
+  layout: (list: T[]) => void
 }

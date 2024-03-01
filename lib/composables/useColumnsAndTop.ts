@@ -6,13 +6,13 @@ import { isNumber } from '../utils'
 
 /**
  * @description: 计算列数及每列的 top 值
- * @param {string} selector 父元素选择器
+ * @param {Function} wrapperWidthHandler 获取盒子父元素宽度的函数
  * @param {number | () => number} colWidth 列宽
  * @param {number | () => number} gap 间隔
  * @return {ColumnsAndTop} { finalWidth, finalGap, columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop }
  */
 export default function useColumnsAndTop (
-  selector: string,
+  wrapperWidthHandler: () => number,
   colWidth: number | (() => number),
   gap: number | (() => number)
 ): ColumnsAndTop {
@@ -31,7 +31,7 @@ export default function useColumnsAndTop (
   // 更新列数以及实际宽度
   const updateColumnsAndTop = (): void => {
     columns.value = 1
-    const parentWidth = document.querySelector(selector)?.parentElement?.offsetWidth || 0
+    const parentWidth = wrapperWidthHandler()
 
     finalGap.value = trigger(gap)
     finalWidth.value = trigger(colWidth)
