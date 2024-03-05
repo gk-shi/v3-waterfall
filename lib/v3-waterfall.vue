@@ -193,7 +193,8 @@ export default defineComponent({
         root: scrollElement
       })
       // 开始监听
-      intersectionObserver.observe(document.getElementById(anchorId) as HTMLElement)
+      const anchor = document.getElementById(anchorId) as HTMLElement
+      anchor && intersectionObserver.observe(anchor)
     }
 
     // 防止一种 case：当底部 anchor 最开始没有渲染，切换到渲染时， observer 初始并没有观察到 anchor
