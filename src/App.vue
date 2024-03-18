@@ -60,7 +60,9 @@ const toggleLimit = async () => {
               <h3>{{ slotProp.item.title }}</h3>
               <p>{{ slotProp.item.outline }}</p>
             </div>
-            <img :src="slotProp.item.ttt" data-key="ttt" class="cover" />
+            <div class="cover-wrapper">
+              <img :src="slotProp.item.ttt" data-key="ttt" class="cover" />
+            </div>
           </a>
           <div class="outline-bottom">
             <p class="article-tags">

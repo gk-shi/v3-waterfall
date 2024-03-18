@@ -32,8 +32,8 @@
 </template>
 
 <script lang="ts" setup generic="T extends object">
-import { Ref, onMounted, toRefs, ref, watch, useSlots } from 'vue'
-import { useUniqueID, useColumnsAndTop, useLayout } from './composables'
+import { Ref, onMounted, toRefs, ref, watch, useSlots, onActivated, onDeactivated, nextTick, onBeforeUnmount } from 'vue'
+import { useUniqueID, useColumnsAndTop, useLayout, useAnchorObserver } from './composables'
 import type { V3WaterfallProps, V3WaterfallInnerProperty, WaterfallList } from './global.d'
 
 // 定义组件需要暴露的名字
@@ -43,6 +43,10 @@ defineSlots<{
   default(props: { item: T, position: { col: number, row: number } }): any
   loading(): any
   footer(): any
+}>()
+
+const emit = defineEmits<{
+  'scroll-reach-bottom': []
 }>()
 
 const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
@@ -97,28 +101,98 @@ const waterfall = async (noLayoutedList: WaterfallList<T>) => {
   displayList.value = list.value
 }
 
+// 兼容滚动事件绑定在 window 上，
+// 并且页面被 keep-alive 缓存时滚动穿越的情形
+// (a 页面绑定滚动被缓存，b 页面滚动会影响 a 页面的监听)
+const isActive = ref(true)
+onActivated(() => (isActive.value = true))
+onDeactivated(() => (isActive.value = false))
+
+
+// 支持滚动事件绑定至非 window 对象
+let scrollElement: null | HTMLElement = null
+// 观察底部 anchor 是否出现
+const { anchorObserver, anchorDisconnect, anchorIsHidden } = useAnchorObserver()
+const anchorObserverHandler = () => {
+  const anchor = document.getElementById(anchorID)
+  anchorObserver(scrollElement, anchor, () => {
+    if (isLoading.value || isOver.value || !isActive.value) return
+    emit('scroll-reach-bottom')
+  })
+}
+
+watch(isLoading, (newV) => {
+  if (!newV) {
+    setTimeout(() => {
+      const viewport = scrollElement || document.documentElement || document.body
+      const anchor = document.getElementById(anchorID)
+      const isHidden = anchorIsHidden(scrollElement, viewport, anchor)
+      if (!isHidden) {
+        // emit('scroll-reach-bottom')
+      }
+    }, 100)
+  }
+})
+
+watch(isMounted, (newV) => {
+  if (scrollBodySelector && newV) {
+    scrollElement = document.querySelector(scrollBodySelector)
+    anchorObserverHandler()
+  }
+})
+
+// 防止一种 case：当底部 anchor 最开始没有渲染，切换到渲染时， observer 初始并没有观察到 anchor
+watch(isOver, (newV, oldV) => {
+  if (!newV && oldV) {
+    nextTick(() => {
+      anchorObserverHandler()
+    })
+  }
+})
+
+watch(list, (newV, oldV) => {
+  const start = oldV.length ? oldV.length : 0
+  const noLayouted = newV.slice(start)
+  waterfall(noLayouted)
+})
+
 const init = () => {
+  if (scrollElement && scrollBodySelector) {
+    // 在存在指定父元素滚动的时候，切换或重载时需要滚动到顶部
+    scrollElement.scrollTo(0, 0)
+  }
   updateColumnsAndTop()
   waterfall(list.value)
 }
 
-watch(list, () => {
-  init()
-})
+// resize 相关
+const documentBody = document.documentElement || document.body
+let resizeTimeHandler: NodeJS.Timeout
+let lastClientWidth = documentBody.offsetWidth
+const resizeHandelr = () => {
+  const clientWidth = documentBody.offsetWidth
+  if (clientWidth === lastClientWidth) return
+  lastClientWidth = clientWidth
+  clearTimeout(resizeTimeHandler)
+  resizeTimeHandler = setTimeout(() => {
+    init()
+  }, 500)
+}
 
 onMounted(() => {
   init()
+  window.addEventListener('resize', resizeHandelr)
+  if (!scrollBodySelector) {
+    nextTick(() => {
+      anchorObserverHandler()
+    })
+  }
 })
 
-
-const test = ref([])
-// @ts-ignore
-window.test = test
-watch(test, (newV, oldV) => {
-  console.log('newV = ', newV)
-  console.log('oldV = ', oldV)
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeHandelr)
+  anchorDisconnect()
 })
-
 </script>
 
 <style scoped>

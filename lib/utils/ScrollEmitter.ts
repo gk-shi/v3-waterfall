@@ -25,7 +25,7 @@ export default class ScrollEmitter {
    * @param {number} time 节流延迟
    * @return {*}
    */
-  bind(target: null | HTMLElement, time: number | undefined): void {
+  bind(target: null | HTMLElement, time: number | undefined) {
     this.scrollElement = target || this.scrollElement
     this.time = time || this.time
     this.scrollElement.addEventListener('scroll', this.resolve.bind(this))
@@ -35,7 +35,7 @@ export default class ScrollEmitter {
    * @description: 回调执行
    * @return {*}
    */
-  resolve(): void {
+  resolve() {
     if (this.isWaiting) return
     this.isWaiting = true
     setTimeout(() => {
@@ -58,7 +58,7 @@ export default class ScrollEmitter {
    * @param {function} scrollFn 需要添加的回调函数
    * @return {*}
    */
-  add(scrollFn: () => void): void {
+  add(scrollFn: () => void) {
     this.scrollFnQueue.push(scrollFn)
   }
 
@@ -67,7 +67,7 @@ export default class ScrollEmitter {
    * @param {function} scrollFn 需要删除的回调函数
    * @return {*}
    */
-  del(scrollFn: () => void): void {
+  del(scrollFn: () => void) {
     const idx = this.scrollFnQueue.findIndex((f) => f === scrollFn)
     idx !== -1 && this.scrollFnQueue.splice(idx, 1)
   }

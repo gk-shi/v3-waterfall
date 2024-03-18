@@ -44,6 +44,7 @@ export default function useColumnsAndTop (
      */
     columns.value = Math.floor((parentWidth + finalGap.value) / (finalWidth.value + finalGap.value))
 
+
     wrapperWidth.value = finalWidth.value * columns.value + finalGap.value * (columns.value - 1)
 
     // 初始时，每一列的 top 值都为 0
