@@ -46,7 +46,7 @@ const toggleLimit = async () => {
   </div>
   <div :class="{ content: true, 'limit-box': isLimit }">
     <!--  -->
-    <v3-waterfall :key="forUpdate" class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280"
+    <v3-waterfall :key="forUpdate" class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280" :virtual-time="400"
       :distanceToScroll="200" :scrollBodySelector="isLimit ? '.limit-box' : ''"
       error-img-src="https://img0.baidu.com/it/u=3795572393,2553392013&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1709312400&t=50c6dad49f2b33d8969053a20e39f261"
       :isMounted="isMounted" :isLoading="loading" :isOver="over" @scrollReachBottom="getNext">

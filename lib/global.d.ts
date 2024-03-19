@@ -19,7 +19,7 @@ export interface V3WaterfallProps<T> {
   errorImgSrc?: string
   scrollBodySelector?: string
   isMounted?: boolean
-  virtual?: boolean
+  virtualTime?: number
   virtualLength?: number
   heightHook?: HeightHook<ReturnType<typeof useSlots>, T>
 }
@@ -27,10 +27,10 @@ export interface V3WaterfallProps<T> {
 // 内部需要生成的一些属性
 export interface V3WaterfallInnerProperty {
   _v3_hash: string
-  _v3_width?: number | string
-  _v3_height?: number | string
-  _v3_top?: number | string
-  _v3_left?: number | string
+  _v3_width?: number
+  _v3_height?: number
+  _v3_top?: number
+  _v3_left?: number
   _v3_position?: {
     col: number
     row: number

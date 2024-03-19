@@ -48,7 +48,7 @@ export default class ScrollEmitter {
    * @description: 解绑事件
    * @return {*}
    */
-  unbind(): void {
+  unbind() {
     this.scrollElement.addEventListener('scroll', this.resolve.bind(this))
     this.scrollFnQueue = []
   }

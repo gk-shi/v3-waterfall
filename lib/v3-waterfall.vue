@@ -15,7 +15,7 @@
       </div>
     </div>
     <!-- loading slot 区域 -->
-    <slot v-if="isLoading && !isOver" name="loading">
+    <slot v-if="actualLoading && !isOver" name="loading">
       <div class="waterfall-loading">
         <div class="dot-wrapper">
           <span class="dot" v-for="(item, idx) of new Array(dotsCount)" :key="idx"></span>
@@ -32,8 +32,8 @@
 </template>
 
 <script lang="ts" setup generic="T extends object">
-import { Ref, onMounted, toRefs, ref, watch, useSlots, onActivated, onDeactivated, nextTick, onBeforeUnmount } from 'vue'
-import { useUniqueID, useColumnsAndTop, useLayout, useAnchorObserver } from './composables'
+import { Ref, onMounted, toRefs, ref, watch, useSlots, onActivated, onDeactivated, nextTick, onBeforeUnmount, computed } from 'vue'
+import { useUniqueID, useColumnsAndTop, useLayout, useAnchorObserver, useVirtualFilter } from './composables'
 import type { V3WaterfallProps, V3WaterfallInnerProperty, WaterfallList } from './global.d'
 
 // 定义组件需要暴露的名字
@@ -65,12 +65,12 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   errorImgSrc: '', // 图片加载失败时默认展示的替换图片
   scrollBodySelector: '', // 滚动主体选择器，默认为页面
   isMounted: false, // 父组件是否加载完成，和 scrollBodySelector 配合使用
-  virtual: true, // 是否开启虚拟列表
+  virtualTime: 0, // 虚拟列表的触发间隔, 默认为 0 时，不做虚拟列表
   virtualLength: 500, // 元素隐藏时距离视窗的距离
   heightHook: null // 用户自定义元素高度计算方式
 })
 
-const { colWidth, gap, bottomGap, dotsCount, dotsColor, overText, overColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtual, virtualLength, heightHook } = props
+const { colWidth, gap, bottomGap, dotsCount, dotsColor, overText, overColor, distanceToScroll, errorImgSrc, scrollBodySelector, virtualTime, virtualLength, heightHook } = props
 
 // 这几个值需要保持响应式
 const { list, isLoading, isOver, isMounted } = toRefs(props)
@@ -93,14 +93,6 @@ const colToListMap = new Map<string | number, WaterfallList<T>>()
 const slots = useSlots()
 const { wrapperHeight, layout } = useLayout(innerWeakMap, colToListMap, topOfEveryColumn, bottomGap, finalWidth, finalGap, errorImgSrc, slots, heightHook)
 
-const displayList = ref<WaterfallList<T>>([]) as Ref<WaterfallList<T>>
-
-const waterfall = async (noLayoutedList: WaterfallList<T>) => {
-  await layout(noLayoutedList)
-  // TODO 虚拟列表计算
-  displayList.value = list.value
-}
-
 // 兼容滚动事件绑定在 window 上，
 // 并且页面被 keep-alive 缓存时滚动穿越的情形
 // (a 页面绑定滚动被缓存，b 页面滚动会影响 a 页面的监听)
@@ -108,6 +100,27 @@ const isActive = ref(true)
 onActivated(() => (isActive.value = true))
 onDeactivated(() => (isActive.value = false))
 
+const displayList = ref<WaterfallList<T>>([]) as Ref<WaterfallList<T>>
+const { bind, unbind, filter } = useVirtualFilter<T>(list, displayList, isActive, virtualTime, innerWeakMap, virtualLength)
+
+
+const isInnerLoading = ref(false)
+const actualLoading = computed(() => {
+  return isLoading.value || isInnerLoading.value
+})
+
+const waterfall = async (noLayoutedList: WaterfallList<T>) => {
+  isInnerLoading.value = true
+  try {
+    await layout(noLayoutedList)
+    filter()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isInnerLoading.value = false
+  }
+
+}
 
 // 支持滚动事件绑定至非 window 对象
 let scrollElement: null | HTMLElement = null
@@ -116,19 +129,19 @@ const { anchorObserver, anchorDisconnect, anchorIsHidden } = useAnchorObserver()
 const anchorObserverHandler = () => {
   const anchor = document.getElementById(anchorID)
   anchorObserver(scrollElement, anchor, () => {
-    if (isLoading.value || isOver.value || !isActive.value) return
+    if (actualLoading.value || isOver.value || !isActive.value) return
     emit('scroll-reach-bottom')
   })
 }
 
-watch(isLoading, (newV) => {
+watch(actualLoading, (newV) => {
   if (!newV) {
     setTimeout(() => {
       const viewport = scrollElement || document.documentElement || document.body
       const anchor = document.getElementById(anchorID)
       const isHidden = anchorIsHidden(scrollElement, viewport, anchor)
       if (!isHidden) {
-        // emit('scroll-reach-bottom')
+        emit('scroll-reach-bottom')
       }
     }, 100)
   }
@@ -137,6 +150,7 @@ watch(isLoading, (newV) => {
 watch(isMounted, (newV) => {
   if (scrollBodySelector && newV) {
     scrollElement = document.querySelector(scrollBodySelector)
+    bind(scrollElement)
     anchorObserverHandler()
   }
 })
@@ -184,6 +198,7 @@ onMounted(() => {
   window.addEventListener('resize', resizeHandelr)
   if (!scrollBodySelector) {
     nextTick(() => {
+      bind(scrollElement)
       anchorObserverHandler()
     })
   }
@@ -191,6 +206,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeHandelr)
+  unbind()
   anchorDisconnect()
 })
 </script>
