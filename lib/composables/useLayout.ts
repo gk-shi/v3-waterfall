@@ -37,9 +37,17 @@ export default function useLayout<T extends object>(
   const layout = async (noLayoutedList: WaterfallList<T>) => {
     if (!noLayoutedList.length) return
     const finalBottomGap = isNumber(bottomGap) ? bottomGap : bottomGap()
+    const item2HeightMap = new Map<T, number>()
+    await batchGetHeightQueue<T>(noLayoutedList, async (item, cb) => {
+      const height = await getHeight(slots, item, width.value, errorImgSrc)
+      item2HeightMap.set(item, height)
+      cb && cb()
+    })
     for (let i = 0; i < noLayoutedList.length; i++) {
       const item = noLayoutedList[i]
-      const height = await getHeight(slots, item, width.value, errorImgSrc)
+      // const height = await getHeight(slots, item, width.value, errorImgSrc)
+      const height = item2HeightMap.get(item)
+      // console.log('height - ', height)
 
       const list = topOfEveryColumn.value
       const indexOfMinTop = list.indexOf(Math.min.apply(null, list))
@@ -85,6 +93,34 @@ export default function useLayout<T extends object>(
 
 }
 
+function batchGetHeightQueue<T extends object>(list: T[], cb: (item: T, next: () => void) => Promise<unknown>): Promise<void> {
+  const MAX_BATCH_COUNT = 5
+  let count = 0
+  let index = 0
+  let completeCount = 0
+  return new Promise((resolve, reject) => {
+    const next = () => {
+      if (count >= MAX_BATCH_COUNT) return
+      count++
+      const item = list[index]
+      if (!item) return
+      index++
+      cb(item, () => {
+        completeCount++
+        if (completeCount >= list.length) {
+          resolve()
+          return
+        }
+        count--
+        next()
+      })
+      next()
+    }
+    next()
+  })
+}
+
+
 async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, errorImgSrc: string): Promise<number> {
   const div = document.createElement('div')
   div.style.position ='absolute'
@@ -108,7 +144,7 @@ async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, error
 }
 
 
-function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise<{}> {
+function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise<{[p: string]: string}> {
   return new Promise((resolve, reject) => {
     const len = imgs.length
     if (len === 0) resolve({})
@@ -132,9 +168,9 @@ function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise
         }
         img.setAttribute('data-self', 'true')
         const src = errImgSrc || _v3_error_image
-        img.src = src
         const key = img.getAttribute('data-key')
         key2Src[key] = src
+        img.src = src
       }
     })
   })
@@ -144,7 +180,6 @@ function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise
 function hash(): string {
   return `${Date.now()}-${Math.random()}`
 }
-
 
 type Layout<T> = {
   wrapperHeight: Ref<number>

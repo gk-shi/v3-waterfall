@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { getData } from './mock'
 
 const list = ref<unknown[]>([])
@@ -12,7 +12,7 @@ const fetchList = async (): Promise<void> => {
   loading.value = false
 
   list.value = list.value.concat(newList)
-  if (list.value.length > 120) over.value = true
+  if (list.value.length > 30) over.value = true
 }
 
 onMounted(fetchList)
@@ -29,13 +29,16 @@ const isMounted = ref(false)
 
 const forUpdate = ref(0)
 const isLimit = ref(false)
-const toggleLimit = async () => {
+const toggleLimit = () => {
   isLimit.value = !isLimit.value
+  isMounted.value = false
   list.value = []
   over.value = false
   forUpdate.value++
-  await fetchList()
-  isMounted.value = true
+  nextTick(async () => {
+    await fetchList()
+    isMounted.value = true
+  })
 }
 </script>
 

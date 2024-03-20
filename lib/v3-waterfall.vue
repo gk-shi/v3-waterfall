@@ -25,7 +25,7 @@
     <!-- 底部锚点区域 -->
     <div v-if="!isOver" :id="anchorID" class="bottom-anchor"></div>
     <!-- 加载完 slot 区域 -->
-    <slot v-if="isOver" name="footer">
+    <slot v-if="!isInnerLoading && isOver" name="footer">
       <div class="waterfall-over-message">{{ overText }}</div>
     </slot>
   </div>
@@ -76,6 +76,7 @@ const { colWidth, gap, bottomGap, dotsCount, dotsColor, overText, overColor, dis
 const { list, isLoading, isOver, isMounted } = toRefs(props)
 
 const { wrapperID, anchorID, itemClass } = useUniqueID()
+
 const getWidthOfWrapperParent = () => {
   return document.querySelector(`#${wrapperID}`)?.parentElement?.offsetWidth || 0
 }
@@ -139,6 +140,7 @@ watch(actualLoading, (newV) => {
     setTimeout(() => {
       const viewport = scrollElement || document.documentElement || document.body
       const anchor = document.getElementById(anchorID)
+      if (!anchor) return
       const isHidden = anchorIsHidden(scrollElement, viewport, anchor)
       if (!isHidden) {
         emit('scroll-reach-bottom')
@@ -151,7 +153,9 @@ watch(isMounted, (newV) => {
   if (scrollBodySelector && newV) {
     scrollElement = document.querySelector(scrollBodySelector)
     bind(scrollElement)
-    anchorObserverHandler()
+    nextTick(() => {
+      anchorObserverHandler()
+    })
   }
 })
 

@@ -35,8 +35,6 @@ export default function virtualFilter<T extends object> (
      * 1.在视窗顶部滚动出去的，距离视窗 viewport 顶部 virtualLength 以外的
      */
     const scrollTop = viewport.scrollTop
-    // @ts-ignore
-    window.inw = innerWeakMap
     displyList.value = list.value.filter(l => {
       const inner = innerWeakMap.get(l)
       // case: 当在滚动时又在加载新的未经计算的元素时
