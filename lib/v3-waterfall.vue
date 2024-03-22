@@ -169,6 +169,7 @@ watch(isOver, (newV, oldV) => {
 })
 
 watch(list, (newV, oldV) => {
+  // TODO 此处还未考虑 list 整体替换的过程
   const start = oldV.length ? oldV.length : 0
   const noLayouted = newV.slice(start)
   waterfall(noLayouted)

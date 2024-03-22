@@ -138,7 +138,7 @@ async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, error
 
   const body = document.body || document.documentElement
   body.appendChild(div)
-  const height = div.clientHeight
+  const height = div.offsetHeight
   body.removeChild(div)
   return height
 }
