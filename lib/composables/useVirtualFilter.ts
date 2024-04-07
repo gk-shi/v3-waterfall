@@ -1,6 +1,6 @@
 import { Ref } from 'vue'
 import Emitter from '../utils/ScrollEmitter'
-import { ListItem } from './imagePreload'
+import { V3WaterfallInnerProperty } from '../global'
 
 
 type VirtualFilter = {
@@ -9,11 +9,13 @@ type VirtualFilter = {
   filter: () => void
 }
 
-export default function virtualFilter (
-  list: Ref<ListItem[]>,
+export default function virtualFilter<T extends object> (
+  list: Ref<T[]>,
+  displyList: Ref<T[]>,
   isActive: Ref<boolean>,
   time: number,
-  virtualLen?: number
+  innerWeakMap: WeakMap<T, V3WaterfallInnerProperty>,
+  virtualLen?: number,
 ): VirtualFilter {
   const virtualLength = virtualLen || 500 // 前后预加载的虚拟长度
   const emitter = new Emitter()
@@ -21,6 +23,10 @@ export default function virtualFilter (
 
   const filter = () => {
     if (!isActive.value) return
+    if (!time) {
+      displyList.value = list.value
+      return
+    }
     const viewport = scrollElement || document.documentElement || document.body
     const vHeight = viewport.clientHeight
     /**
@@ -29,11 +35,14 @@ export default function virtualFilter (
      * 1.在视窗顶部滚动出去的，距离视窗 viewport 顶部 virtualLength 以外的
      */
     const scrollTop = viewport.scrollTop
-    list.value.forEach(l => {
-      const { _v3_top: v3Top, _v3_bottom: v3Bottom } = l
-      const topDisappeared = scrollTop > v3Bottom + virtualLength
+    displyList.value = list.value.filter(l => {
+      const inner = innerWeakMap.get(l)
+      // case: 当在滚动时又在加载新的未经计算的元素时
+      if (!inner) return false
+      const { _v3_top: v3Top, _v3_height: v3Height } = inner
+      const topDisappeared = scrollTop > v3Top + v3Height + virtualLength
       const bottomDisappeared = scrollTop + vHeight + virtualLength < v3Top
-      l._v3_hidden = topDisappeared || bottomDisappeared
+      return !(topDisappeared || bottomDisappeared)
     })
   }
 

@@ -1,22 +1,88 @@
+<script setup lang="ts">
+import { nextTick, onMounted, ref } from 'vue'
+import { getData } from './mock'
+import type { V3WaterfallExpose } from 'lib/global'
+
+const list = ref<unknown[]>([])
+
+const loading = ref(false)
+const over = ref(false)
+const fetchList = async (): Promise<void> => {
+  loading.value = true
+  const newList = await getData()
+  loading.value = false
+
+  list.value = list.value.concat(newList)
+  if (list.value.length > 30) over.value = true
+}
+
+onMounted(fetchList)
+
+let isLoad = false
+const getNext: () => Promise<void> = async (): Promise<void> => {
+  if (isLoad) return
+  isLoad = true
+  await fetchList()
+  isLoad = false
+}
+
+const isMounted = ref(false)
+
+const forUpdate = ref(0)
+const isLimit = ref(false)
+const toggleLimit = () => {
+  isLimit.value = !isLimit.value
+  isMounted.value = false
+  list.value = []
+  over.value = false
+  forUpdate.value++
+  nextTick(async () => {
+    await fetchList()
+    isMounted.value = true
+  })
+}
+
+const v3WaterfallRef = ref<V3WaterfallExpose | null>()
+const insertBefore = async () => {
+  const data = await getData()
+  data.forEach((item, idx) => item.title += `-插入${idx + 1}`)
+  v3WaterfallRef.value?.insertBefore(data)
+}
+</script>
+
 <template>
   <div class="menu">
     <p :class="{ active: !isLimit }" @click="toggleLimit">滚动挂载 window</p>
     <p :class="{ active: isLimit }" @click="toggleLimit">滚动挂载父元素</p>
+    <p :class="{ active: isLimit }" @click="insertBefore">在最前面插入元素</p>
   </div>
   <div :class="{ content: true, 'limit-box': isLimit }">
-    <!--  -->
-    <v3-waterfall :key="forUpdate" class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280"
-      :distanceToScroll="200" :scrollBodySelector="isLimit ? '.limit-box' : ''"
-      :isMounted="isMounted" :isLoading="loading" :isOver="over" @scrollReachBottom="getNext">
+    <v3-waterfall
+      ref="v3WaterfallRef"
+      :key="forUpdate"
+      :list="list"
+      :colWidth="280"
+      :virtual-time="400"
+      :scrollBodySelector="isLimit ? '.limit-box' : ''"
+      :isMounted="isMounted"
+      :isLoading="loading"
+      :isOver="over"
+      class="waterfall"
+      @scrollReachBottom="getNext"
+    >
       <template v-slot:default="slotProp">
         <div class="list-item">
           <a :href="'https://gkshi.com/blog/' + slotProp.item._id">
             <div class="cover-wrapper">
-              <img v-if="slotProp.item.cover" :src="slotProp.item.cover" class="cover" />
+              <!-- data-key 是该图片的字段名称，目前只支持在一级的字段，不支持嵌套 -->
+              <img v-if="slotProp.item.cover" :src="slotProp.item.cover" data-key="cover" class="cover" />
             </div>
             <div class="brief">
               <h3>{{ slotProp.item.title }}</h3>
               <p>{{ slotProp.item.outline }}</p>
+            </div>
+            <div class="cover-wrapper">
+              <img :src="slotProp.item.notExistSrc" data-key="notExistSrc" class="cover" />
             </div>
           </a>
           <div class="outline-bottom">
@@ -33,63 +99,6 @@
     </v3-waterfall>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
-import { getData } from './mock'
-
-export default defineComponent({
-  name: 'App',
-  setup () {
-    const list = ref<unknown[]>([])
-
-    const loading = ref(false)
-    const over = ref(false)
-    const fetchList = async (): Promise<void> => {
-      loading.value = true
-      const newList = await getData()
-      loading.value = false
-
-      list.value = list.value.concat(newList)
-      if (list.value.length > 120) over.value = true
-    }
-
-    onMounted(fetchList)
-
-    let isLoad = false
-    const getNext: () => Promise<void> = async (): Promise<void> => {
-      if (isLoad) return
-      isLoad = true
-      await fetchList()
-      isLoad = false
-    }
-
-    const isMounted = ref(false)
-
-    const forUpdate = ref(0)
-    const isLimit = ref(false)
-    const toggleLimit = async () => {
-      isLimit.value = !isLimit.value
-      list.value = []
-      over.value = false
-      forUpdate.value++
-      await fetchList()
-      isMounted.value = true
-    }
-
-    return {
-      isLimit,
-      toggleLimit,
-      isMounted,
-      forUpdate,
-      list,
-      getNext,
-      loading,
-      over
-    }
-  }
-})
-</script>
 
 <style lang="scss" scoped>
 .menu {
