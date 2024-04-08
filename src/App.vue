@@ -54,7 +54,7 @@ const insertBefore = async () => {
   <div class="menu">
     <p :class="{ active: !isLimit }" @click="toggleLimit">滚动挂载 window</p>
     <p :class="{ active: isLimit }" @click="toggleLimit">滚动挂载父元素</p>
-    <p :class="{ active: isLimit }" @click="insertBefore">在最前面插入元素</p>
+    <p @click="insertBefore">在最前面插入元素</p>
   </div>
   <div :class="{ content: true, 'limit-box': isLimit }">
     <v3-waterfall

@@ -12,12 +12,11 @@ export function getDevice(userAgent?: string): Device {
       : 'pc'
 }
 
-
 /**
  * @description: 是否为手机
  * @return {boolean}
  */
-export function isMobile (): boolean {
+export function isMobile(): boolean {
   return getDevice() === 'mobile'
 }
 
@@ -29,7 +28,6 @@ export function isMobile (): boolean {
 export function screenMaxIs(width: number): boolean {
   return window.screen.width <= width
 }
-
 
 /**
  * @description: 判断是否为 number 类型

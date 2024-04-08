@@ -1,5 +1,5 @@
-import { Ref, h, ref, render, useSlots } from "vue"
-import { isNumber } from "../utils"
+import { Ref, h, ref, render, useSlots } from 'vue'
+import { isNumber } from '../utils'
 import { _v3_error_image } from '../utils/errorImgBase64'
 import type { V3WaterfallInnerProperty, WaterfallList, HeightHook } from '../global.d'
 
@@ -29,7 +29,6 @@ export default function useLayout<T extends object>(
   slots: SlotsType,
   heightHook: HeightHook<SlotsType, T>
 ): Layout<T> {
-
   const wrapperHeight = ref(0)
 
   const getHeight = heightHook ? heightHook : innerGetHeight
@@ -53,7 +52,6 @@ export default function useLayout<T extends object>(
       list[indexOfMinTop] = topOfThisItem + height + finalBottomGap
 
       const left = (width.value + gap.value) * indexOfMinTop
-
 
       wrapperHeight.value = Math.max.apply(null, list)
 
@@ -102,7 +100,7 @@ export default function useLayout<T extends object>(
     const oldLen = list.length
     const len = insertLen + oldLen
     for (let i = 0; i < len; i++) {
-      const item =  i < insertLen ? insertList[i] : list[i - insertLen]
+      const item = i < insertLen ? insertList[i] : list[i - insertLen]
       let height = item2HeightMap.get(item) || 0
       if (i >= insertLen) {
         height = innerWeakMap.get(item)._v3_height
@@ -146,10 +144,12 @@ export default function useLayout<T extends object>(
     layout,
     insertItemsBefore
   }
-
 }
 
-function batchGetHeightQueue<T extends object>(list: T[], cb: (item: T, next: () => void) => Promise<unknown>): Promise<void> {
+function batchGetHeightQueue<T extends object>(
+  list: T[],
+  cb: (item: T, next: () => void) => Promise<unknown>
+): Promise<void> {
   const MAX_BATCH_COUNT = 5
   let count = 0
   let index = 0
@@ -176,11 +176,15 @@ function batchGetHeightQueue<T extends object>(list: T[], cb: (item: T, next: ()
   })
 }
 
-
-async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, errorImgSrc: string): Promise<number> {
+async function innerGetHeight<T>(
+  slots: SlotsType,
+  item: T,
+  width: number,
+  errorImgSrc: string
+): Promise<number> {
   const div = document.createElement('div')
-  div.style.position ='absolute'
-  div.style.left ='-1000px'
+  div.style.position = 'absolute'
+  div.style.left = '-1000px'
   div.style.width = width + 'px'
   div.style.visibility = 'hidden'
 
@@ -188,7 +192,7 @@ async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, error
 
   const imgs = div.querySelectorAll('img')
   const replaceObj = await loadImg(imgs, errorImgSrc)
-  Object.keys(replaceObj).forEach(k => {
+  Object.keys(replaceObj).forEach((k) => {
     item[k] = replaceObj[k]
   })
 
@@ -199,14 +203,16 @@ async function innerGetHeight<T>(slots: SlotsType, item: T, width: number, error
   return height
 }
 
-
-function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise<{[p: string]: string}> {
+function loadImg(
+  imgs: NodeListOf<HTMLImageElement>,
+  errImgSrc: string
+): Promise<{ [p: string]: string }> {
   return new Promise((resolve, reject) => {
     const len = imgs.length
     if (len === 0) resolve({})
     const key2Src = {}
     let count = 0
-    imgs.forEach(img => {
+    imgs.forEach((img) => {
       if (!img.src) {
         count++
         if (count === len) resolve(key2Src)
@@ -232,13 +238,12 @@ function loadImg(imgs: NodeListOf<HTMLImageElement>, errImgSrc: string): Promise
   })
 }
 
-
 function hash(): string {
   return `${Date.now()}-${Math.random()}`
 }
 
 type Layout<T> = {
   wrapperHeight: Ref<number>
-  layout: (list: T[]) => void,
+  layout: (list: T[]) => void
   insertItemsBefore: (list: T[], insertList: T[]) => void
 }

@@ -2,20 +2,19 @@ import { Ref } from 'vue'
 import Emitter from '../utils/ScrollEmitter'
 import { V3WaterfallInnerProperty } from '../global'
 
-
 type VirtualFilter = {
   bind: (scrollEl: HTMLElement | null) => void
   unbind: () => void
   filter: () => void
 }
 
-export default function virtualFilter<T extends object> (
+export default function virtualFilter<T extends object>(
   list: Ref<T[]>,
   displyList: Ref<T[]>,
   isActive: Ref<boolean>,
   time: number,
   innerWeakMap: WeakMap<T, V3WaterfallInnerProperty>,
-  virtualLen?: number,
+  virtualLen?: number
 ): VirtualFilter {
   const virtualLength = virtualLen || 500 // 前后预加载的虚拟长度
   const emitter = new Emitter()
@@ -35,7 +34,7 @@ export default function virtualFilter<T extends object> (
      * 1.在视窗顶部滚动出去的，距离视窗 viewport 顶部 virtualLength 以外的
      */
     const scrollTop = viewport.scrollTop
-    displyList.value = list.value.filter(l => {
+    displyList.value = list.value.filter((l) => {
       const inner = innerWeakMap.get(l)
       // case: 当在滚动时又在加载新的未经计算的元素时
       if (!inner) return false

@@ -1,13 +1,51 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { BuildOptions, defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
+import dts from 'vite-plugin-dts'
+
+
+const target = process.env.TARGET
+let buildConfig: BuildOptions = {
+  copyPublicDir: false,
+  lib: {
+    entry: path.resolve(__dirname, 'lib/index.ts'),
+    name: 'v3-waterfall'
+  },
+  rollupOptions: {
+    external: ['vue'],
+    output: {
+      exports: 'named',
+      globals: {
+        vue: 'Vue'
+      }
+    }
+  }
+}
+
+const plugins = [
+  vue(),
+  dts({
+    // rollupTypes: true,
+    // copyDtsFiles: true,
+    outDir: 'dist/typings',
+    tsconfigPath: './lib/tsconfig.json'
+  })
+]
+
+if (target === 'page') {
+  buildConfig = {
+    outDir: 'github-page'
+  }
+  plugins.pop()
+}
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-  ],
+  build: { ...buildConfig },
+  plugins,
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

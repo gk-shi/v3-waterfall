@@ -132,7 +132,7 @@ const data = [
   }
 ]
 
-export async function getData (): Promise<Item[]> {
+export async function getData(): Promise<Item[]> {
   return new Promise((resolve, reject) => {
     const ret = JSON.parse(JSON.stringify([...data, ...data]))
     setTimeout(() => {

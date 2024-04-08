@@ -1,12 +1,16 @@
 <template>
   <div>
     <!-- default slot 区域 -->
-    <div :id="wrapperID" class="vue3-waterfall-wrapper" :style="{
-      width: wrapperWidth + 'px',
-      height: wrapperHeight + 'px'
-    }">
+    <div
+      :id="wrapperID"
+      class="vue3-waterfall-wrapper"
+      :style="{
+        width: wrapperWidth + 'px',
+        height: wrapperHeight + 'px'
+      }"
+    >
       <div
-        v-for="(item, idx) of displayList"
+        v-for="item of displayList"
         :key="getItemProperty(item)._v3_hash"
         :class="['waterfall-item', itemClass, animation ? 'waterfall-item-animation' : '']"
         :style="getItemProperty(item)._v3_styles || {}"
@@ -32,15 +36,38 @@
 </template>
 
 <script lang="ts" setup generic="T extends object">
-import { Ref, onMounted, toRefs, ref, watch, useSlots, onActivated, onDeactivated, nextTick, onBeforeUnmount, computed } from 'vue'
-import { useUniqueID, useColumnsAndTop, useLayout, useAnchorObserver, useVirtualFilter } from './composables'
-import type { V3WaterfallProps, V3WaterfallInnerProperty, WaterfallList, V3WaterfallExpose } from './global.d'
+import {
+  Ref,
+  onMounted,
+  toRefs,
+  ref,
+  watch,
+  useSlots,
+  onActivated,
+  onDeactivated,
+  nextTick,
+  onBeforeUnmount,
+  computed
+} from 'vue'
+import {
+  useUniqueID,
+  useColumnsAndTop,
+  useLayout,
+  useAnchorObserver,
+  useVirtualFilter
+} from './composables'
+import type {
+  V3WaterfallProps,
+  V3WaterfallInnerProperty,
+  WaterfallList,
+  V3WaterfallExpose
+} from './global.d'
 
 // 定义组件需要暴露的名字
 defineOptions({ name: 'v3-waterfall' })
 
 defineSlots<{
-  default(props: { item: T, position: { col: number, row: number } }): any
+  default(props: { item: T; position: { col: number; row: number } }): any
   loading(): any
   footer(): any
 }>()
@@ -71,7 +98,22 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   heightHook: null // 用户自定义元素高度计算方式
 })
 
-const { colWidth, gap, bottomGap, dotsCount, dotsColor, overText, overColor, animation, distanceToScroll, errorImgSrc, scrollBodySelector, virtualTime, virtualLength, heightHook } = props
+const {
+  colWidth,
+  gap,
+  bottomGap,
+  dotsCount,
+  dotsColor,
+  overText,
+  overColor,
+  animation,
+  distanceToScroll,
+  errorImgSrc,
+  scrollBodySelector,
+  virtualTime,
+  virtualLength,
+  heightHook
+} = props
 
 // 这几个值需要保持响应式
 const { list, isLoading, isOver, isMounted } = toRefs(props)
@@ -82,18 +124,29 @@ const getWidthOfWrapperParent = () => {
   return document.querySelector(`#${wrapperID}`)?.parentElement?.offsetWidth || 0
 }
 
-const { finalWidth, finalGap, columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop } = useColumnsAndTop(getWidthOfWrapperParent, colWidth, gap)
+const { finalWidth, finalGap, columns, wrapperWidth, topOfEveryColumn, updateColumnsAndTop } =
+  useColumnsAndTop(getWidthOfWrapperParent, colWidth, gap)
 
 // 每个元素与之生成的内部属性
 const innerWeakMap = new WeakMap<T, V3WaterfallInnerProperty>()
 function getItemProperty(item: T) {
-  return innerWeakMap.get(item) || {} as V3WaterfallInnerProperty
+  return innerWeakMap.get(item) || ({} as V3WaterfallInnerProperty)
 }
 // 列号 -> 元素列表
 const colToListMap = new Map<string | number, WaterfallList<T>>()
 
 const slots = useSlots()
-const { wrapperHeight, layout, insertItemsBefore } = useLayout(innerWeakMap, colToListMap, topOfEveryColumn, bottomGap, finalWidth, finalGap, errorImgSrc, slots, heightHook)
+const { wrapperHeight, layout, insertItemsBefore } = useLayout(
+  innerWeakMap,
+  colToListMap,
+  topOfEveryColumn,
+  bottomGap,
+  finalWidth,
+  finalGap,
+  errorImgSrc,
+  slots,
+  heightHook
+)
 
 // 兼容滚动事件绑定在 window 上，
 // 并且页面被 keep-alive 缓存时滚动穿越的情形
@@ -104,7 +157,14 @@ onDeactivated(() => (isActive.value = false))
 
 // 当前位置实际应该展示的内容项集合
 const displayList = ref<WaterfallList<T>>([]) as Ref<WaterfallList<T>>
-const { bind, unbind, filter } = useVirtualFilter<T>(list, displayList, isActive, virtualTime, innerWeakMap, virtualLength)
+const { bind, unbind, filter } = useVirtualFilter<T>(
+  list,
+  displayList,
+  isActive,
+  virtualTime,
+  innerWeakMap,
+  virtualLength
+)
 
 /**
  * 实际 loading 态分为两个部分
@@ -121,44 +181,10 @@ let scrollElement: null | HTMLElement = null
 // 观察底部 anchor 是否出现
 const { anchorObserver, anchorDisconnect, anchorIsHidden } = useAnchorObserver()
 
-<<<<<<< Updated upstream
-
-    // 使用 IntersectionObserver
-    let scrollElement: null | HTMLElement = null
-    let intersectionObserver: IntersectionObserver
-    function observer () {
-      intersectionObserver && intersectionObserver.disconnect()
-      intersectionObserver = new IntersectionObserver((entries) => {
-        // 如果 intersectionRatio 为 0，则目标在视野外，
-        // 我们不需要做任何事情。
-        if (entries[0].intersectionRatio <= 0) return
-        if (actualLoading.value || isOver.value || !isActive.value) return
-        emit('scroll-reach-bottom')
-      }, {
-        root: scrollElement
-      })
-      // 开始监听
-      const anchor = document.getElementById(anchorId) as HTMLElement
-      anchor && intersectionObserver.observe(anchor)
-    }
-
-    // 防止一种 case：当底部 anchor 最开始没有渲染，切换到渲染时， observer 初始并没有观察到 anchor
-    watch(isOver, (newV, oldV) => {
-      if (!newV && oldV) {
-        nextTick(() => {
-          observer()
-        })
-      }
-    })
-
-    // 校验加载一次数据后底部锚点元素是否隐藏，没隐藏还需要再加载一次数据
-    function checkAnchorIsHidden () {
-      if (isOver.value) return
-=======
+// 校验加载一次数据后底部锚点元素是否隐藏，没隐藏还需要再加载一次数据
 watch(actualLoading, (newV) => {
   if (!newV) {
     setTimeout(() => {
->>>>>>> Stashed changes
       const viewport = scrollElement || document.documentElement || document.body
       const anchor = document.getElementById(anchorID)
       if (!anchor) return
@@ -177,7 +203,6 @@ const anchorObserverHandler = () => {
     emit('scroll-reach-bottom')
   })
 }
-
 
 watch(isMounted, (newV) => {
   if (scrollBodySelector && newV) {
@@ -208,7 +233,6 @@ const waterfall = async (noLayoutedList: WaterfallList<T>) => {
   } finally {
     isInnerLoading.value = false
   }
-
 }
 
 watch(list, (newV, oldV) => {
@@ -271,7 +295,6 @@ const reRender = init
 
 // 在队列之前插入，支持类似下拉刷新的场景
 const insertBefore = async (insertList: WaterfallList<T>) => {
-
   isInnerLoading.value = true
   try {
     const listRef = ref(insertList) as Ref<WaterfallList<T>>
@@ -332,7 +355,7 @@ defineExpose<V3WaterfallExpose<T>>({
   border-radius: 50%;
   background-color: v-bind(dotsColor);
   margin: 0 2px;
-  }
+}
 
 .dot-wrapper > .dot:nth-of-type(2n) {
   animation: dotScale 0.4s linear infinite alternate;
