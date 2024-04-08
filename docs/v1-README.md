@@ -1,45 +1,40 @@
 ## v3-waterfall 自适应瀑布流组件
 
-一个 vue 3 的自适应瀑布流组件。
-
 &nbsp;
-
 <p align="center">
   <a href="https://npmjs.com/package/v3-waterfall"><img src="https://img.shields.io/npm/v/v3-waterfall.svg" alt="npm package"></a>
   <a href="https://img.shields.io/npm/dt/v3-waterfall"><img src="https://img.shields.io/npm/dt/v3-waterfall.svg" alt="downloads"></a>
   <a href="https://img.shields.io/npm/l/v3-waterfall"><img src="https://img.shields.io/npm/l/v3-waterfall.svg" alt="downloads"></a>
 </p>
 
+&nbsp;
+
+> 本组件支持 ESM 和 UMD 两种方式引入。
 
 
 [在线Demo](https://gk-shi.github.io/v3-waterfall/)
 
-该 demo 即为本项目`src/`内容。
+该 demo 即为本项目`example/`内容。
 
 个人博客使用地址：[这里](https://gkshi.com/blog)
 
-> 2.x 存在不兼容 1.x 更新，迁移方式参考文档最后说明。如需要查看 1.x 版本的文档，请查看`docs/`目录下的[v1-README.md](/docs/v1-README.md)
-
 &nbsp;
-
 ### 1.支持功能
 
 - 一个针对 vue 3 的瀑布流组件
 - 支持无图模式及图片加载失败时默认图片
-- 图片预加载自动计算排版，不需要指定图片宽高（**2.x 已支持多图模式、自定义提供元素高度**）
+- 图片预加载自动计算排版，不需要指定图片宽高
 - 响应式排版
 - 支持绑定滚动父元素
 - 支持虚拟列表
-- 支持头部插入元素（**2.x 支持，满足类似下拉加载场景**）
 
 &nbsp;
-
 ### 2.使用方法
 
 #### 2.1 安装
 
 ```shell
-pnpm add v3-waterfall
+npm i v3-waterfall
 ```
 
 #### 2.2 注册组件
@@ -61,51 +56,37 @@ createApp(App)
 #### 2.3 引入使用
 
 ```vue
-<v3-waterfall ref="v3WaterfallRef" :key="forUpdate" :list="list" :colWidth="280" :virtual-time="400" :scrollBodySelector="isLimit ? '.limit-box' : ''" :isMounted="isMounted" :isLoading="loading" :isOver="over" class="waterfall" @scrollReachBottom="getNext">
+<v3-waterfall class="waterfall" :list="list" srcKey="cover" :gap="12" :colWidth="280"
+              :distanceToScroll="200" :isLoading="loading" :isOver="over" @scrollReachBottom="getNext">
   <template v-slot:default="slotProp">
     <div class="list-item">
       <a :href="'https://gkshi.com/blog/' + slotProp.item._id">
         <div class="cover-wrapper">
-          <!-- 此处注意：data-key 是该图片的字段名称，目前只支持在一级的字段，不支持嵌套 -->
-          <img v-if="slotProp.item.cover" :src="slotProp.item.cover" data-key="cover" class="cover" />
+          <img v-if="slotProp.item.cover" :src="slotProp.item.cover" class="cover" />
         </div>
         <div class="brief">
+          <!-- slotProp.raw 可直接访问原始数据对象(响应式) -->
           <h3>{{ slotProp.item.title }}</h3>
           <p>{{ slotProp.item.outline }}</p>
         </div>
-        <div class="cover-wrapper">
-          <img :src="slotProp.item.notExistSrc" data-key="notExistSrc" class="cover" />
-        </div>
       </a>
-      <div class="outline-bottom">
-        <p class="article-tags">
-          <span>tags</span>
-          <span v-for="tag of slotProp.item.tags" :key="tag" class="tag">{{
-            tag
-            }}</span>
-        </p>
-        <time>{{ slotProp.item.time }}</time>
-      </div>
     </div>
   </template>
 </v3-waterfall>
 ```
 
 
-> 注意⚠️：
+> 注意：
 >
 > 1.尽管做了需要多次加载的校验，但首次加载的数据尽量达到可以出现滚动的条件
 >
 > 2.在对 list 进行增量时，请使用`list.value = list.value.concat(addedList)`,因为组件内部会做增量加载，如果用`push`的方法添加，会造成多次触发，因此监听时取消了对`push`的响应
->
-> 3.注意上面代码中的`img`标签使用，插槽中所有未在固定高度的容器中的图片(即会影响元素高度的图片)，均需要加上`data-key`字段，要求见上面的注释。(如果你提供元素高度计算方法可忽略)
 
 
-更为完整的基本示例在`src/App.vue`中有具体代码，同时本项目`pnpm dev`运行起来的项目即能看到效果。
+更为完整的基本示例在`example/App.vue`中有具体代码，同时本项目`yarn dev`运行起来的项目即能看到效果。
 
 
 &nbsp;
-
 ### 3.组件参数说明
 
 |        参数        |   类型   |          默认值          |                             描述                             |
@@ -124,10 +105,10 @@ createApp(App)
 | scrollBodySelector |  String  |            -             | 绑定滚动父元素选择器，默认为`window`对象，与`isMounted`参数配合使用 |
 |     isMounted      | Boolean  |          false           |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
 |    errorImgSrc     |  String  |            -             |                 图片加载失败时展示的图片地址                 |
-|    virtualTime     |  Number  |            0             |        触发虚拟列表校验时间间隔，0 默认不开启虚拟列表        |
-|   virtualLength    |  Number  |           500            |            默认移出视窗距离开启虚拟隐藏，单位: px            |
+| virtualTime | Number | 0 | 触发虚拟列表校验时间间隔，0 默认不开启虚拟列表 |
+| virtualLength | Number | 500 | 默认移出视窗距离开启虚拟隐藏，单位: px |
 | scrollReachBottom  | Function |            -             |                     触发加载更多时的函数                     |
-|      reRender      | Function |            -             |            通过 ref 可直接调用该组件方法进行重载             |
+| reRender  | Function |            -             |                     通过 ref 可直接调用该组件方法进行重载                     |
 
 #### 3.1 特殊字段说明
 
@@ -172,6 +153,8 @@ createApp(App)
 
 `virtualLength`指的是当一个元素随着滚动消失在视窗外(可能消失在上方、下方)的距离需要被隐藏。
 
+**由于本组件需要预渲染进行位置排版计算，所以该虚拟列表表现稍有不同，可以参考[#18](https://github.com/gk-shi/v3-waterfall/issues/18)说明。**
+
 &nbsp;
 
 
@@ -181,6 +164,8 @@ createApp(App)
 #### 4.1 默认插槽(v-slot:default)
 
 瀑布流卡片展示内容，自定义，展示什么，添加什么事件，可扩展。
+
+**注：目前只支持使用一个 img 标签进行封面加载**
 
 
 
