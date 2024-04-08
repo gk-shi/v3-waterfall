@@ -13,7 +13,7 @@ const targetDir = resolve(__dirname, '../dist/typings')
 
 const src = resolve(__dirname, '../lib/global.d.ts')
 
-const template = `import "./global"`
+const template = `export * from './global';`
 
 const main = async () => {
   // 复制全局类型至 dist/typings/ 目录下

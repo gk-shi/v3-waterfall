@@ -6,6 +6,5 @@
     "emitDeclarationOnly": true,
     "declarationDir": "../dist/typings"
   },
-  "include": [".", "./global.d.ts", "./**/*.ts", "./**/*.vue"],
-  "exclude": ["../**/*.ico"]
+  "include": [".", "./global.d.ts", "./**/*.ts", "./**/*.vue"]
 }

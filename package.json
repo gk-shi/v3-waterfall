@@ -10,7 +10,8 @@
     "./dist/style.css": "./dist/style.css",
     ".": {
       "import": "./dist/v3-waterfall.js",
-      "require": "./dist/v3-waterfall.umd.js"
+      "require": "./dist/v3-waterfall.umd.js",
+      "types": "./dist/typings/index.d.ts"
     }
   },
   "files": [
@@ -22,7 +23,7 @@
     "build:page": "rimraf github-page && cross-env TARGET=page vite build",
     "build:npm": "rimraf dist && cross-env TARGET=npm vite build && pnpm build:types",
     "build:types": "node ./scripts/genTypes.js",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "pnpm build:page && pnpm build:npm",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
