@@ -79,7 +79,6 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   list: () => [], // 元数据列表
   colWidth: 250, // 列宽
-  srcKey: 'src', // 图片地址的键值，数组支持多个键值
   gap: 20, // 两列间的间隔，单位：px
   bottomGap: 10, // 上下元素的间距，单位：px
   isLoading: false, // 是否正在加载
@@ -89,8 +88,8 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   overText: '呀，被看光了！', // 加载完的文字
   overColor: '#999999', // 加载完的文字的颜色
   animation: true, // 是否开启内置动画
-  distanceToScroll: 200, // 底部触发加载的距离，单位：px
   errorImgSrc: '', // 图片加载失败时默认展示的替换图片
+  distanceToScroll: 200, // 底部触发加载的距离，单位：px
   scrollBodySelector: '', // 滚动主体选择器，默认为页面
   isMounted: false, // 父组件是否加载完成，和 scrollBodySelector 配合使用
   virtualTime: 0, // 虚拟列表的触发间隔, 默认为 0 时，不做虚拟列表
@@ -255,6 +254,8 @@ const init = () => {
     // 在存在指定父元素滚动的时候，切换或重载时需要滚动到顶部
     scrollElement.scrollTo(0, 0)
   }
+  // innerWeakMap 无需清空，因为其不影响重渲染时的存储
+  colToListMap.clear()
   updateColumnsAndTop()
   waterfall(list.value)
 }

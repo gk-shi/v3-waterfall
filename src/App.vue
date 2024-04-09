@@ -48,13 +48,18 @@ const insertBefore = async () => {
   data.forEach((item, idx) => item.title += `-插入${idx + 1}`)
   v3WaterfallRef.value?.insertBefore(data)
 }
+
+const reRender = () => {
+  v3WaterfallRef.value?.reRender()
+}
 </script>
 
 <template>
   <div class="menu">
     <p :class="{ active: !isLimit }" @click="toggleLimit">滚动挂载 window</p>
     <p :class="{ active: isLimit }" @click="toggleLimit">滚动挂载父元素</p>
-    <p @click="insertBefore">在最前面插入元素</p>
+    <button @click="insertBefore">在最前面插入元素</button>
+    <button @click="reRender">重渲染</button>
   </div>
   <div :class="{ content: true, 'limit-box': isLimit }">
     <v3-waterfall
@@ -104,14 +109,21 @@ const insertBefore = async () => {
 .menu {
   position: fixed;
   left: 0;
-  padding-top: 300px;
+  padding: 300px 0 0 20px;
   width: 200px;
   height: 100vh;
   border-right: 1px solid #ccc;
 
+  p, button {
+    margin-bottom: 20px;
+  }
+
   p {
-    margin: 20px;
     cursor: pointer;
+  }
+
+  button {
+    display: block;
   }
 }
 
