@@ -39,7 +39,8 @@ export default function useColumnsAndTop(
      * 此时展示两列，中间一个间隔，2 * 140 + (2 - 1) * 20 = 300
      * 所以，等式两边同时+1个间隔，得出 实际列数(n) ≤ (容器宽度 + 间隔) / (列宽 + 间隔)
      */
-    columns.value = Math.floor((parentWidth + finalGap.value) / (finalWidth.value + finalGap.value))
+    const cols = Math.floor((parentWidth + finalGap.value) / (finalWidth.value + finalGap.value))
+    columns.value = cols >= 1 ? cols : 1
 
     wrapperWidth.value = finalWidth.value * columns.value + finalGap.value * (columns.value - 1)
 

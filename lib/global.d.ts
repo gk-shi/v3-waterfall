@@ -1,7 +1,7 @@
 import { useSlots } from 'vue'
 
 export type WaterfallList<T = any> = T[]
-export type HeightHook<T, U = any> = null | ((slots: T, item: U, width: number) => Promise<number>)
+export type HeightHook<T, U = any> = null | ((slots: T, item: U, width: number, errorImgSrc: string) => Promise<number>)
 
 // 定义 props 类型
 export interface V3WaterfallProps<T> {
