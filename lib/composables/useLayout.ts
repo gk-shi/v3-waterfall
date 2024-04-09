@@ -176,6 +176,14 @@ function batchGetHeightQueue<T extends object>(
   })
 }
 
+/**
+ * 计算元素高度
+ * @param {SlotsType} slots 内部 slots 组
+ * @param {T} item 该元素块对应数据信息
+ * @param {number} width 元素块宽度
+ * @param {string} errorImgSrc 用户提供的错误图片
+ * @returns {Promise<number>} 高度
+ */
 async function innerGetHeight<T>(
   slots: SlotsType,
   item: T,
