@@ -167,7 +167,6 @@ createApp(App).use(V3waterfall).mount('#app')
 ```
 
 由于子组件的`mounted`生命周期比父组件`mounted`先执行，所以需要通过父组件主动通知已挂载完成后，子组件才能往`div.father-box`元素上添加滚动监听等事件。
-
 &nbsp;
 
 - `virtualTime`和`virtualLength`
