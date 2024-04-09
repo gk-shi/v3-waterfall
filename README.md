@@ -259,7 +259,7 @@ const v3WaterfallRef = ref<V3WaterfallExpose<T> | null>(null)
 
 // 调用重渲染
 v3WaterfallRef.value?.reRender()
-// 调用头部插入
+// 调用头部插入，此方法会自动插入 list 当中，无须手动再次插入
 v3WaterfallRef.value?.insertBefore(insertBeforeList)
 </script>
 ```
