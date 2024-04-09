@@ -44,6 +44,7 @@ if (target === 'page') {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: target === 'page' ? '/v3-waterfall/' : '/',
   build: { ...buildConfig },
   plugins,
   resolve: {
