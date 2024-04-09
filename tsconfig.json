@@ -1,19 +1,11 @@
 {
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "strict": true,
-    "jsx": "preserve",
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
-    "types": ["vite/client"],
-    // "declaration": true,
-    // "declarationDir": "./dist",
-    // "emitDeclarationOnly": true
-  },
-  "include": ["example/*.d.ts", "example/**/*.ts", "example/**/*.vue", "lib/**/*.ts", "lib/*.ts", "lib/*.d.ts", "lib/**/*.vue"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
 }

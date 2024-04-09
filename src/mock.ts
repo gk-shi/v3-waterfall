@@ -104,6 +104,7 @@ const data = [
     outline: '如果图片加载失败，会用默认的错误图片展示。',
     _id: '',
     title: '图片裂开',
+    notExistSrc: '',
     created_time: '04-17 2020'
   },
   {
@@ -115,6 +116,7 @@ const data = [
     outline: 'call、apply 方法在实际开发中还是有用到的，学习了它的相关原理，再自己手写一遍来加深自己的理解。',
     _id: '5e89f3a1f93a5234433bb582',
     title: '手写模拟实现 call、apply 方法',
+    notExistSrc: '',
     created_time: '04-05 2020'
   },
   {
@@ -130,11 +132,21 @@ const data = [
   }
 ]
 
-export async function getData (): Promise<unknown[]> {
+export async function getData(): Promise<Item[]> {
   return new Promise((resolve, reject) => {
-    const ret = [...data, ...data]
+    const ret = JSON.parse(JSON.stringify([...data, ...data]))
     setTimeout(() => {
       resolve(ret)
     }, 100)
   })
+}
+
+interface Item {
+  tags: string[]
+  cover: string
+  outline: string
+  _id: string
+  title: string
+  created_time: string
+  [attr: string]: any
 }
