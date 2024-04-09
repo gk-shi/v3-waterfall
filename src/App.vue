@@ -1,15 +1,15 @@
-<script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+<script setup lang="ts" generic="T extends object">
+import { nextTick, onMounted, ref, type Ref } from 'vue'
 import { getData } from './mock'
 import type { V3WaterfallExpose } from 'lib/global'
 
-const list = ref<unknown[]>([])
+const list = ref<T[]>([]) as Ref<T[]>
 
 const loading = ref(false)
 const over = ref(false)
 const fetchList = async (): Promise<void> => {
   loading.value = true
-  const newList = await getData()
+  const newList = (await getData()) as T[]
   loading.value = false
 
   list.value = list.value.concat(newList)

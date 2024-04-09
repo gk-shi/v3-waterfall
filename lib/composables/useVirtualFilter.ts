@@ -34,6 +34,7 @@ export default function virtualFilter<T extends object>(
      * 1.在视窗顶部滚动出去的，距离视窗 viewport 顶部 virtualLength 以外的
      */
     const scrollTop = viewport.scrollTop
+    // TODO：不需要循环所有，只需要分别找到顶部、底部第一个不需要展示的，在它之前或之后的元素肯定不展示，后续优化
     displyList.value = list.value.filter((l) => {
       const inner = innerWeakMap.get(l)
       // case: 当在滚动时又在加载新的未经计算的元素时
