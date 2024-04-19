@@ -9,7 +9,6 @@
   <a href="https://img.shields.io/npm/dt/v3-waterfall"><img src="https://img.shields.io/npm/dt/v3-waterfall.svg" alt="downloads"></a>
   <a href="https://img.shields.io/npm/l/v3-waterfall"><img src="https://img.shields.io/npm/l/v3-waterfall.svg" alt="downloads"></a>
 </p>
-
 [在线Demo](https://gk-shi.github.io/v3-waterfall/)
 
 该 demo 即为本项目`src/`内容。
@@ -128,10 +127,10 @@ createApp(App).use(V3waterfall).mount('#app')
 |     isMounted      |                           boolean                            |          false           |    否    |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
 |    virtualTime     |                            number                            |            0             |    否    |        触发虚拟列表校验时间间隔，0 默认不开启虚拟列表        |
 |   virtualLength    |                            number                            |           500            |    否    |            默认移出视窗距离开启虚拟隐藏，单位: px            |
-|     heightHook     | null \| (slots, item, width, errorImgSrc) => Promise<number> |            -             |    否    |    自定义元素块高度函数钩子，支持promise，此为 props 字段    |
+|     heightHook     | null \| (slots, item, width, errorImgSrc) => Promise\<number> |            -             |    否    |    自定义元素块高度函数钩子，支持promise，此为 props 字段    |
 | scrollReachBottom  |                          () => void                          |            -             |    否    |                     触发加载更多时的函数                     |
 |      reRender      |                          () => void                          |            -             |    -     |          通过 ref 可直接调用该组件方法进行重新渲染           |
-|    insertBefore    |                (insertList) => Promise<void>                 |            -             |    -     |    通过 ref 可直接调用该组件方法往`list`首部插入元素列表     |
+|    insertBefore    |                (insertList) => Promise\<void>                |            -             |    -     |    通过 ref 可直接调用该组件方法往`list`首部插入元素列表     |
 
 #### 3.1 特殊字段说明
 
