@@ -35,16 +35,7 @@ export default function virtualFilter<T extends object>(
      */
     const scrollTop = viewport.scrollTop
     // TODO：不需要循环所有，只需要分别找到顶部、底部第一个不需要展示的，在它之前或之后的元素肯定不展示，后续优化
-    // binarySearchDisplay<T>(list.value, innerWeakMap, scrollTop, vHeight, virtualLength)
-    displyList.value = list.value.filter((l) => {
-      const inner = innerWeakMap.get(l)
-      // case: 当在滚动时又在加载新的未经计算的元素时
-      if (!inner) return false
-      const { _v3_top: v3Top, _v3_height: v3Height } = inner
-      const topDisappeared = scrollTop > v3Top + v3Height + virtualLength
-      const bottomDisappeared = scrollTop + vHeight + virtualLength < v3Top
-      return !(topDisappeared || bottomDisappeared)
-    })
+    displyList.value = binarySearchDisplay<T>(list.value, innerWeakMap, scrollTop, vHeight, virtualLength)
   }
 
   const bind = (scrollEl: HTMLElement | null) => {
@@ -67,14 +58,14 @@ export default function virtualFilter<T extends object>(
   }
 }
 
-
+// TODO: 暂时没性能提升
 function binarySearchDisplay<T extends object>(
   list: WaterfallList<T>,
   innerWeakMap: WeakMap<T, V3WaterfallInnerProperty>,
   scrollTop: number,
   vHeight: number,
   virtualLength: number
-): number[] {
+): WaterfallList<T> {
   if (!list.length) return []
   let start = 0
   let end = list.length - 1
@@ -102,15 +93,36 @@ function binarySearchDisplay<T extends object>(
   if (firstTarget === -1) return []
   // 用找到的第一个在显示区间的元素，前后查找
   // TODO 未完成
-  // let leftIdx = -1
-  // let rightIdx = -1
-  // for (let i = 1; ;i++) {
-  //   if (leftIdx !== -1 && rightIdx !== -1) break
-  //   if (leftIdx === -1) {
-  //     const left = list[firstTarget - i]
-  //     const leftProerty = innerWeakMap.get(left)
-  //   }
-  //   if (rightIdx === -1) {}
-  // }
-  return []
+  let leftIdx = -1
+  let rightIdx = -1
+  for (let i = 1; ; i++) {
+    if (leftIdx !== -1 && rightIdx !== -1) break
+    if (leftIdx === -1) {
+      const left = list[firstTarget - i]
+      const leftProerty = innerWeakMap.get(left)
+      if (!left || !leftProerty) {
+        leftIdx = firstTarget - i + 1
+      } else {
+        const { _v3_top: v3Top, _v3_height: v3Height } = leftProerty
+        const topDisappeared = scrollTop > v3Top + v3Height + virtualLength
+        if (topDisappeared) {
+          leftIdx = firstTarget - i + 1
+        }
+      }
+    }
+    if (rightIdx === -1) {
+      const right = list[firstTarget + i]
+      const rightProerty = innerWeakMap.get(right)
+      if (!right || !rightProerty) {
+        rightIdx = firstTarget + i - 1
+      } else {
+        const { _v3_top: v3Top } = rightProerty
+        const bottomDisappeared = scrollTop + vHeight + virtualLength < v3Top
+        if (bottomDisappeared) {
+          rightIdx = firstTarget + i - 1
+        }
+      }
+    }
+  }
+  return list.slice(leftIdx, rightIdx + 1)
 }

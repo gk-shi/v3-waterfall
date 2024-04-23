@@ -13,7 +13,7 @@ const fetchList = async (): Promise<void> => {
   loading.value = false
 
   list.value = list.value.concat(newList)
-  if (list.value.length > 30) over.value = true
+  if (list.value.length > 1000) over.value = true
 }
 
 onMounted(fetchList)
