@@ -35,6 +35,7 @@ export default function virtualFilter<T extends object>(
      */
     const scrollTop = viewport.scrollTop
     // TODO：不需要循环所有，只需要分别找到顶部、底部第一个不需要展示的，在它之前或之后的元素肯定不展示，后续优化
+    // 2024-04-24： 测试正常使用下来发现多余的时间消耗不大，但以下代码更易理解，暂不进行修改
     displyList.value = list.value.filter((l) => {
       const inner = innerWeakMap.get(l)
       // case: 当在滚动时又在加载新的未经计算的元素时
