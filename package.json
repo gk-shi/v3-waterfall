@@ -3,14 +3,14 @@
   "version": "2.0.0-beta.2",
   "private": false,
   "type": "module",
-  "main": "./dist/v3-waterfall.umd.js",
+  "main": "./dist/v3-waterfall.umd.cjs",
   "module": "./dist/v3-waterfall.js",
   "types": "./dist/typings/index.d.ts",
   "exports": {
     "./dist/style.css": "./dist/style.css",
     ".": {
       "import": "./dist/v3-waterfall.js",
-      "require": "./dist/v3-waterfall.umd.js",
+      "require": "./dist/v3-waterfall.umd.cjs",
       "types": "./dist/typings/index.d.ts"
     }
   },
