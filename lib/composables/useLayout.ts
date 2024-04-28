@@ -33,65 +33,68 @@ export default function useLayout<T extends object>(
 
   const getHeight = heightHook ? heightHook : innerGetHeight
 
+  const getHeightMap = async (list: WaterfallList<T>) => {
+    const item2HeightMap = new Map<T, number>()
+    await batchGetHeightQueue<T>(list, async (item, cb) => {
+      const height = await getHeight(slots, item, width.value, errorImgSrc)
+      item2HeightMap.set(item, height)
+      cb && cb()
+    })
+    return item2HeightMap
+  }
+
+  const updatePositionAndProperty = (item: T, height: number, topOfEveryColumn: number[], finalBottomGap: number, hashHandler: (item: T) => string) => {
+    const indexOfMinTop = topOfEveryColumn.indexOf(Math.min.apply(null, topOfEveryColumn))
+    const topOfThisItem = topOfEveryColumn[indexOfMinTop]
+    topOfEveryColumn[indexOfMinTop] = topOfThisItem + height + finalBottomGap
+    const left = (width.value + gap.value) * indexOfMinTop
+
+    if (!colToListMap.has(indexOfMinTop)) {
+      colToListMap.set(indexOfMinTop, [])
+    }
+    const colList = colToListMap.get(indexOfMinTop)
+    colList.push(item)
+
+    // 存储相关内部数据
+    const innerObj = {
+      _v3_hash: hashHandler(item),
+      _v3_styles: {
+        width: width.value + 'px',
+        left: left + 'px',
+        top: topOfThisItem + 'px'
+      },
+      _v3_height: height,
+      _v3_top: topOfThisItem,
+      _v3_left: left,
+      _v3_position: {
+        col: indexOfMinTop, // 第几列，从 0 开始计数
+        row: colList.length - 1
+      }
+    }
+
+    innerWeakMap.set(item, innerObj)
+  }
+
   const layout = async (noLayoutedList: WaterfallList<T>) => {
     if (!noLayoutedList.length) return
     const finalBottomGap = isNumber(bottomGap) ? bottomGap : bottomGap()
-    const item2HeightMap = new Map<T, number>()
-    await batchGetHeightQueue<T>(noLayoutedList, async (item, cb) => {
-      const height = await getHeight(slots, item, width.value, errorImgSrc)
-      item2HeightMap.set(item, height)
-      cb && cb()
-    })
+    const item2HeightMap = await getHeightMap(noLayoutedList)
+    const topOfEveryColumnList = topOfEveryColumn.value
+
     for (let i = 0; i < noLayoutedList.length; i++) {
       const item = noLayoutedList[i]
       const height = item2HeightMap.get(item)
-
-      const list = topOfEveryColumn.value
-      const indexOfMinTop = list.indexOf(Math.min.apply(null, list))
-      const topOfThisItem = list[indexOfMinTop]
-      list[indexOfMinTop] = topOfThisItem + height + finalBottomGap
-
-      const left = (width.value + gap.value) * indexOfMinTop
-
-      wrapperHeight.value = Math.max.apply(null, list)
-
-      if (!colToListMap.has(indexOfMinTop)) {
-        colToListMap.set(indexOfMinTop, [])
-      }
-      const colList = colToListMap.get(indexOfMinTop)
-      colList.push(item)
-
-      // 存储相关内部数据
-      const innerObj = {
-        _v3_hash: hash(),
-        _v3_styles: {
-          width: width.value + 'px',
-          left: left + 'px',
-          top: topOfThisItem + 'px'
-        },
-        _v3_height: height,
-        _v3_top: topOfThisItem,
-        _v3_left: left,
-        _v3_position: {
-          col: indexOfMinTop, // 第几列，从 0 开始计数
-          row: colList.length - 1
-        }
-      }
-
-      innerWeakMap.set(item, innerObj)
+      const hashHandler = () => hash()
+      updatePositionAndProperty(item, height, topOfEveryColumnList, finalBottomGap, hashHandler)
     }
+    wrapperHeight.value = Math.max.apply(null, topOfEveryColumnList)
   }
 
-  // TODO： 和 layout 一起进行优化
+
   const insertItemsBefore = async (list: WaterfallList<T>, insertList: WaterfallList<T>) => {
     if (!insertList || !insertList.length) return
     const finalBottomGap = isNumber(bottomGap) ? bottomGap : bottomGap()
-    const item2HeightMap = new Map<T, number>()
-    await batchGetHeightQueue<T>(insertList, async (item, cb) => {
-      const height = await getHeight(slots, item, width.value, errorImgSrc)
-      item2HeightMap.set(item, height)
-      cb && cb()
-    })
+    const item2HeightMap = await getHeightMap(insertList)
     // 需要对元素位置进行重新定位
     const newTopOfEveryColumn = new Array(topOfEveryColumn.value.length).fill(0)
     colToListMap.forEach((_, key) => colToListMap.set(key, []))
@@ -105,35 +108,12 @@ export default function useLayout<T extends object>(
       if (i >= insertLen) {
         height = innerWeakMap.get(item)._v3_height
       }
-      const indexOfMinTop = newTopOfEveryColumn.indexOf(Math.min.apply(null, newTopOfEveryColumn))
-      const topOfThisItem = newTopOfEveryColumn[indexOfMinTop]
-      newTopOfEveryColumn[indexOfMinTop] = topOfThisItem + height + finalBottomGap
-      const left = (width.value + gap.value) * indexOfMinTop
-
-      if (!colToListMap.has(indexOfMinTop)) {
-        colToListMap.set(indexOfMinTop, [])
+      // 如果之前存在的元素，只改变位置信息，hash 不变(渲染时绑定的 key 不变)，减少diff过程
+      const hashHandler = (item: T) => {
+        const property = innerWeakMap.get(item)
+        return property ? property._v3_hash : hash()
       }
-      const colList = colToListMap.get(indexOfMinTop)
-      colList.push(item)
-
-      // 存储相关内部数据
-      const innerObj = {
-        _v3_hash: hash(),
-        _v3_styles: {
-          width: width.value + 'px',
-          left: left + 'px',
-          top: topOfThisItem + 'px'
-        },
-        _v3_height: height,
-        _v3_top: topOfThisItem,
-        _v3_left: left,
-        _v3_position: {
-          col: indexOfMinTop, // 第几列，从 0 开始计数
-          row: colList.length - 1
-        }
-      }
-
-      innerWeakMap.set(item, innerObj)
+      updatePositionAndProperty(item, height, newTopOfEveryColumn, finalBottomGap, hashHandler)
     }
     topOfEveryColumn.value = newTopOfEveryColumn
     wrapperHeight.value = Math.max.apply(null, newTopOfEveryColumn)
@@ -154,6 +134,7 @@ function batchGetHeightQueue<T extends object>(
   let count = 0
   let index = 0
   let completeCount = 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return new Promise((resolve, reject) => {
     const next = () => {
       if (count >= MAX_BATCH_COUNT) return
@@ -215,6 +196,7 @@ function loadImg(
   imgs: NodeListOf<HTMLImageElement>,
   errImgSrc: string
 ): Promise<{ [p: string]: string }> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return new Promise((resolve, reject) => {
     const len = imgs.length
     if (len === 0) resolve({})
