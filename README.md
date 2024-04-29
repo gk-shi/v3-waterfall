@@ -9,6 +9,9 @@
   <a href="https://img.shields.io/npm/dt/v3-waterfall"><img src="https://img.shields.io/npm/dt/v3-waterfall.svg" alt="downloads"></a>
   <a href="https://img.shields.io/npm/l/v3-waterfall"><img src="https://img.shields.io/npm/l/v3-waterfall.svg" alt="downloads"></a>
 </p>
+
+文档: 中文 | [English](/README_EN.md)
+
 [在线Demo](https://gk-shi.github.io/v3-waterfall/)
 
 该 demo 即为本项目`src/`内容。
