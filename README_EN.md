@@ -226,11 +226,10 @@ const heightHook = (slots, item, width, errorImgSrc) => {
   // Render the card slot using the render function
   render(h(slots.default, { item }), div)
 
-  // 将图片隐藏，图片的高度额外计算
+  // Hide the image, with additional consideration for the height of the image
   const img = div.querySelector('img')
   img.style.display = 'none'
-  // Hide the image and calculate the height of other elements separately
-  const img = div.querySelector('img')
+  // Calculate the height of elements excluding the image
   const body = document.body || document.documentElement
   body.appendChild(div)
   const otherHeight = div.offsetHeight
