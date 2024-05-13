@@ -182,7 +182,7 @@ const { anchorObserver, anchorDisconnect, anchorIsHidden } = useAnchorObserver()
 
 // 校验加载一次数据后底部锚点元素是否隐藏，没隐藏还需要再加载一次数据
 watch(actualLoading, (newV) => {
-  if (!newV) {
+  if (!newV && !isOver.value) {
     setTimeout(() => {
       const viewport = scrollElement || document.documentElement || document.body
       const anchor = document.getElementById(anchorID)
@@ -223,6 +223,7 @@ watch(isOver, (newV, oldV) => {
 })
 
 const waterfall = async (noLayoutedList: WaterfallList<T>) => {
+  if (!noLayoutedList || !noLayoutedList.length) return
   isInnerLoading.value = true
   try {
     await layout(noLayoutedList)
@@ -296,6 +297,7 @@ const reRender = init
 
 // 在队列之前插入，支持类似下拉刷新的场景
 const insertBefore = async (insertList: WaterfallList<T>) => {
+  if (!insertList || !insertList.length) return
   isInnerLoading.value = true
   try {
     const listRef = ref(insertList) as Ref<WaterfallList<T>>
