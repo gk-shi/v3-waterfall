@@ -236,15 +236,15 @@ const waterfall = async (noLayoutedList: WaterfallList<T>) => {
 }
 
 watch(list, (newV, oldV) => {
-  if (!newV.length && oldV.length) {
+  // 1.清空   2.直接赋新值
+  const clear = !newV.length && oldV.length
+  // 默认瀑布流是做增量更新，当第一个元素就发生变化时，认为全部更新
+  const isNewList = oldV[0] !== newV[0]
+  if (clear || isNewList) {
     init()
     return
   } else {
     let start = oldV.length ? oldV.length : 0
-    if (oldV[0] !== newV[0]) {
-      // 默认瀑布流是做增量更新，当第一个元素就发生变化时，认为全部更新
-      start = 0
-    }
     const noLayouted = newV.slice(start)
     waterfall(noLayouted)
   }

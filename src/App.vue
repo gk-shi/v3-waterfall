@@ -33,13 +33,13 @@ const isLimit = ref(false)
 const toggleLimit = () => {
   isLimit.value = !isLimit.value
   isMounted.value = false
-  list.value = []
   over.value = false
   forUpdate.value++
-  nextTick(async () => {
+  const getFirstList = async () => {
     await fetchList()
     isMounted.value = true
-  })
+  }
+  getFirstList()
 }
 
 const v3WaterfallRef = ref<V3WaterfallExpose | null>()
