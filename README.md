@@ -111,29 +111,31 @@ createApp(App).use(V3waterfall).mount('#app')
 
 ### 3.组件参数说明
 
-|        参数        |                             类型                              |          默认值          | 是否必填 |                                  描述                                  |
-| :----------------: | :-----------------------------------------------------------: | :----------------------: | :------: | :--------------------------------------------------------------------: |
-|        list        |                             array                             |            []            |    是    |                             瀑布流列表数据                             |
-|      colWidth      |                    number \| () => number                     |           250            |    否    | 瀑布流卡片宽度，**现在不同屏宽使用不同宽度需要自己写函数返回对应宽度** |
-|        gap         |                    number \| () => number                     |            20            |    否    |                         两列间的间距，单位：px                         |
-|     bottomGap      |                    number \| () => number                     |            10            |    否    |                        上下卡片的间距，单位：px                        |
-|     isLoading      |                            boolean                            |          false           |    是    |                     控制请求数据时显示加载状态提示                     |
-|       isOver       |                            boolean                            |          false           |    是    |            控制数据是否已经全部加载完成(即不需要再滚动加载)            |
-|     dotsCount      |                            number                             |            5             |    否    |                           加载中显示点的数量                           |
-|     dotsColor      |                            string                             | rgba(169, 169, 169, 0.8) |    否    |                           加载中显示点的颜色                           |
-|      overText      |                            string                             |      呀，被看光了！      |    否    |                              加载完的文字                              |
-|     overColor      |                            string                             |         \#999999         |    否    |                           加载完的文字的颜色                           |
-|     animation      |                            boolean                            |           true           |    否    |                            是否开启内置动画                            |
-|    errorImgSrc     |                            string                             |            -             |    否    |                图片加载失败时展示的图片地址，有内置图片                |
-|  distanceToScroll  |                            number                             |           200            |    否    |                      底部触发加载的距离，单位：px                      |
-| scrollBodySelector |                            string                             |            -             |    否    |  绑定滚动父元素选择器，默认为`window`对象，与`isMounted`参数配合使用   |
-|     isMounted      |                            boolean                            |          false           |    否    |          父组件是否挂载完成，配合`scrollBodySelector`参数使用          |
-|    virtualTime     |                            number                             |            0             |    否    |             触发虚拟列表校验时间间隔，0 默认不开启虚拟列表             |
-|   virtualLength    |                            number                             |           500            |    否    |                 默认移出视窗距离开启虚拟隐藏，单位: px                 |
-|     heightHook     | null \| (slots, item, width, errorImgSrc) => Promise\<number> |            -             |    否    |         自定义元素块高度函数钩子，支持promise，此为 props 字段         |
-| scrollReachBottom  |                          () => void                           |            -             |    否    |                          触发加载更多时的函数                          |
-|      reRender      |                          () => void                           |            -             |    -     |               通过 ref 可直接调用该组件方法进行重新渲染                |
-|    insertBefore    |                (insertList) => Promise\<void>                 |            -             |    -     |         通过 ref 可直接调用该组件方法往`list`首部插入元素列表          |
+|        参数        |                             类型                             |          默认值          | 是否必填 |                             描述                             |
+| :----------------: | :----------------------------------------------------------: | :----------------------: | :------: | :----------------------------------------------------------: |
+|        list        |                            array                             |            []            |    是    |                        瀑布流列表数据                        |
+|      colWidth      |                    number \| () => number                    |           250            |    否    | 瀑布流卡片宽度，**现在不同屏宽使用不同宽度需要自己写函数返回对应宽度** |
+|        gap         |                    number \| () => number                    |            20            |    否    |                    两列间的间距，单位：px                    |
+|     bottomGap      |                    number \| () => number                    |            10            |    否    |                   上下卡片的间距，单位：px                   |
+|     isLoading      |                           boolean                            |          false           |    是    |                控制请求数据时显示加载状态提示                |
+|       isOver       |                           boolean                            |          false           |    是    |       控制数据是否已经全部加载完成(即不需要再滚动加载)       |
+|       active       |                           boolean                            |           true           |    否    | *类似`van-tabs`组件使用多个`v3-waterfall`时确认是否激活当前实例* |
+|   swipeableDelay   |                            number                            |            0             |    否    | *类似`van-tabs`的`swipeable`属性开启后，可能在刚渲染时立即滑动到另一栏无法成功加载，需要设置此值，推荐为300，根据实际情况调整* |
+|     dotsCount      |                            number                            |            5             |    否    |                      加载中显示点的数量                      |
+|     dotsColor      |                            string                            | rgba(169, 169, 169, 0.8) |    否    |                      加载中显示点的颜色                      |
+|      overText      |                            string                            |      呀，被看光了！      |    否    |                         加载完的文字                         |
+|     overColor      |                            string                            |         \#999999         |    否    |                      加载完的文字的颜色                      |
+|     animation      |                           boolean                            |           true           |    否    |                       是否开启内置动画                       |
+|    errorImgSrc     |                            string                            |            -             |    否    |           图片加载失败时展示的图片地址，有内置图片           |
+|  distanceToScroll  |                            number                            |           200            |    否    |                 底部触发加载的距离，单位：px                 |
+| scrollBodySelector |                            string                            |            -             |    否    | 绑定滚动父元素选择器，默认为`window`对象，与`isMounted`参数配合使用 |
+|     isMounted      |                           boolean                            |          false           |    否    |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
+|    virtualTime     |                            number                            |            0             |    否    |        触发虚拟列表校验时间间隔，0 默认不开启虚拟列表        |
+|   virtualLength    |                            number                            |           500            |    否    |            默认移出视窗距离开启虚拟隐藏，单位: px            |
+|     heightHook     | null \| (slots, item, width, errorImgSrc) => Promise\<number> |            -             |    否    |    自定义元素块高度函数钩子，支持promise，此为 props 字段    |
+| scrollReachBottom  |                          () => void                          |            -             |    否    |                     触发加载更多时的函数                     |
+|      reRender      |                          () => void                          |            -             |    -     |          通过 ref 可直接调用该组件方法进行重新渲染           |
+|    insertBefore    |                (insertList) => Promise\<void>                |            -             |    -     |    通过 ref 可直接调用该组件方法往`list`首部插入元素列表     |
 
 #### 3.1 特殊字段说明
 
