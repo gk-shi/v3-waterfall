@@ -7,6 +7,7 @@ type SlotsType = ReturnType<typeof useSlots>
 
 /**
  * @description: 进行分列布局计算
+ * @param {string} wrapperID 父元素绑定的id
  * @param {WeakMap} innerWeakMap 元素 -> 内部属性 映射
  * @param {Map} colToListMap 列号 -> 元素列表 映射
  * @param {Ref<number[]>} topOfEveryColumn 每一列下个元素的 top 值
@@ -19,6 +20,7 @@ type SlotsType = ReturnType<typeof useSlots>
  * @return {Layout} { wrapperHeight, layout }
  */
 export default function useLayout<T extends object>(
+  wrapperID: string,
   innerWeakMap: WeakMap<T, V3WaterfallInnerProperty>,
   colToListMap: Map<string | number, WaterfallList<T>>,
   topOfEveryColumn: Ref<number[]>,
@@ -36,7 +38,7 @@ export default function useLayout<T extends object>(
   const getHeightMap = async (list: WaterfallList<T>) => {
     const item2HeightMap = new Map<T, number>()
     await batchGetHeightQueue<T>(list, async (item, cb) => {
-      const height = await getHeight(slots, item, width.value, errorImgSrc)
+      const height = await getHeight(slots, item, width.value, errorImgSrc, wrapperID)
       item2HeightMap.set(item, height)
       cb && cb()
     })
@@ -163,13 +165,15 @@ function batchGetHeightQueue<T extends object>(
  * @param {T} item 该元素块对应数据信息
  * @param {number} width 元素块宽度
  * @param {string} errorImgSrc 用户提供的错误图片
+ * @param {string} wrapperID 父元素绑定的id
  * @returns {Promise<number>} 高度
  */
 async function innerGetHeight<T>(
   slots: SlotsType,
   item: T,
   width: number,
-  errorImgSrc: string
+  errorImgSrc: string,
+  wrapperID: string
 ): Promise<number> {
   const div = document.createElement('div')
   div.style.position = 'absolute'
@@ -185,7 +189,7 @@ async function innerGetHeight<T>(
     item[k] = replaceObj[k]
   })
 
-  const body = document.body || document.documentElement
+  const body = document.querySelector(`#${wrapperID}`) || (document.body || document.documentElement)
   body.appendChild(div)
   const height = div.offsetHeight
   body.removeChild(div)

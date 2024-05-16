@@ -11,12 +11,13 @@ type UniqueID = {
  */
 export default function useUniqueID(): UniqueID {
   const timestamp = Date.now()
-  const anchorID = 'anchor' + timestamp
-  const wrapperID = 'wrapper' + timestamp
-  const itemClass = 'item' + timestamp
+  const random = String(Math.random()).replace('.', '')
+  const anchorID = 'anchor' + timestamp + random
+  const wrapperID = 'wrapper' + timestamp + random
+  const itemClass = 'item' + timestamp + random
 
   // 生成新的 id
-  const genNewID = (prefix: string): string => prefix + timestamp
+  const genNewID = (prefix: string): string => prefix + timestamp + random
 
   return { anchorID, wrapperID, itemClass, genNewID }
 }

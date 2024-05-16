@@ -11,6 +11,8 @@ export interface V3WaterfallProps<T> {
   bottomGap?: number | (() => number)
   isLoading?: boolean
   isOver?: boolean
+  active?: boolean
+  swipeableDelay?: number
   dotsCount?: number
   dotsColor?: string
   overText?: string

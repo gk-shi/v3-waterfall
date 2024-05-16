@@ -83,6 +83,8 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   bottomGap: 10, // 上下元素的间距，单位：px
   isLoading: false, // 是否正在加载
   isOver: false, // 是否结束（所有数据加载完）
+  active: true, // 是否激活该组件，给在 tabs 中使用多个组件时确认激活哪一个
+  swipeableDelay: 0, // TODO van-tabs 如果开启 swipeable 后存在问题
   dotsCount: 5, // 底部加载中状态点的数量
   dotsColor: 'rgba(169, 169, 169, 0.8)', // 底部加载中状态点的颜色
   overText: '呀，被看光了！', // 加载完的文字
@@ -105,6 +107,7 @@ const {
   dotsColor,
   overText,
   overColor,
+  swipeableDelay,
   animation,
   distanceToScroll,
   errorImgSrc,
@@ -115,7 +118,7 @@ const {
 } = props
 
 // 这几个值需要保持响应式
-const { list, isLoading, isOver, isMounted } = toRefs(props)
+const { list, isLoading, isOver, isMounted, active } = toRefs(props)
 
 const { wrapperID, anchorID, itemClass } = useUniqueID()
 
@@ -136,6 +139,7 @@ const colToListMap = new Map<string | number, WaterfallList<T>>()
 
 const slots = useSlots()
 const { wrapperHeight, layout, insertItemsBefore } = useLayout(
+  wrapperID,
   innerWeakMap,
   colToListMap,
   topOfEveryColumn,
@@ -188,7 +192,7 @@ watch(actualLoading, (newV) => {
       const anchor = document.getElementById(anchorID)
       if (!anchor) return
       const isHidden = anchorIsHidden(scrollElement, viewport, anchor)
-      if (!isHidden) {
+      if (!isHidden && active.value) {
         emit('scroll-reach-bottom')
       }
     }, 100)
@@ -199,7 +203,9 @@ const anchorObserverHandler = () => {
   const anchor = document.getElementById(anchorID)
   anchorObserver(scrollElement, anchor, () => {
     if (actualLoading.value || isOver.value || !isActive.value) return
-    emit('scroll-reach-bottom')
+    setTimeout(() => {
+      active.value && emit('scroll-reach-bottom')
+    }, swipeableDelay)
   })
 }
 
@@ -231,7 +237,9 @@ const waterfall = async (noLayoutedList: WaterfallList<T>) => {
   } catch (error) {
     console.error(error)
   } finally {
-    isInnerLoading.value = false
+    nextTick(() => {
+      isInnerLoading.value = false
+    })
   }
 }
 
@@ -276,14 +284,15 @@ const resizeHandelr = () => {
 }
 
 onMounted(() => {
-  init()
-  window.addEventListener('resize', resizeHandelr)
-  if (!scrollBodySelector) {
-    nextTick(() => {
+  // 延迟渲染，解决类似 van-tab 组件造成的初始化读取父元素容器宽度为0的问题
+  nextTick(() => {
+    init()
+    window.addEventListener('resize', resizeHandelr)
+    // nextTick(() => {
       bind(scrollElement)
       anchorObserverHandler()
-    })
-  }
+    // })
+  })
 })
 
 onBeforeUnmount(() => {
