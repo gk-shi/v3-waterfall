@@ -119,8 +119,8 @@ createApp(App).use(V3waterfall).mount('#app')
 |     bottomGap      |                    number \| () => number                    |            10            |    否    |                   上下卡片的间距，单位：px                   |
 |     isLoading      |                           boolean                            |          false           |    是    |                控制请求数据时显示加载状态提示                |
 |       isOver       |                           boolean                            |          false           |    是    |       控制数据是否已经全部加载完成(即不需要再滚动加载)       |
-|       active       |                           boolean                            |           true           |    否    | *类似`van-tabs`组件使用多个`v3-waterfall`时确认是否激活当前实例* |
-|   swipeableDelay   |                            number                            |            0             |    否    | *类似`van-tabs`的`swipeable`属性开启后，可能在刚渲染时立即滑动到另一栏无法成功加载，需要设置此值，推荐为300，根据实际情况调整* |
+|       active       |                           boolean                            |           true           |    否    | *类似`van-tabs`组件使用多个`v3-waterfall`时确认是否激活当前实例*，[示例](https://codesandbox.io/p/devbox/v3-waterfall-van-tabs-24h8f5?file=%2Fsrc%2FApp.vue%3A69%2C33) |
+|   swipeableDelay   |                            number                            |            0             |    否    | *类似`van-tabs`的`swipeable`属性开启后，可能在刚渲染时立即滑动到另一栏无法成功加载，需要设置此值，推荐为300，根据实际情况调整*,[示例](https://codesandbox.io/p/devbox/v3-waterfall-van-tabs-24h8f5?file=%2Fsrc%2FApp.vue%3A69%2C33) |
 |     dotsCount      |                            number                            |            5             |    否    |                      加载中显示点的数量                      |
 |     dotsColor      |                            string                            | rgba(169, 169, 169, 0.8) |    否    |                      加载中显示点的颜色                      |
 |      overText      |                            string                            |      呀，被看光了！      |    否    |                         加载完的文字                         |
