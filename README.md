@@ -14,6 +14,8 @@
 
 [在线Demo](https://gk-shi.github.io/v3-waterfall/)
 
+如果需要使用`umd`形式使用该组件，请参考：[v3-waterfall-umd-demo](https://codesandbox.io/p/sandbox/v3-waterfall-umd-demo-xd79l5?file=%2Findex.html%3A158%2C21)
+
 该 demo 即为本项目`src/`内容。
 
 个人博客使用地址：[这里](https://gkshi.com/blog)

@@ -16,6 +16,8 @@ Document: [中文](/README.md) | English
 
 [Online Demo](https://gk-shi.github.io/v3-waterfall/)
 
+If you need to use this component in umd format, please refer to：[v3-waterfall-umd-demo](https://codesandbox.io/p/sandbox/v3-waterfall-umd-demo-xd79l5?file=%2Findex.html%3A158%2C21)
+
 This demo is the content of `src/` directory in this project.
 
 Used in personal blog:[Here](https://gkshi.com/blog)
