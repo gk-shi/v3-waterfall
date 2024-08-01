@@ -11,7 +11,11 @@ let buildConfig: BuildOptions = {
   copyPublicDir: false,
   lib: {
     entry: path.resolve(__dirname, 'lib/index.ts'),
-    name: 'V3Waterfall'
+    name: 'V3Waterfall',
+    fileName: format => {
+      if (format === 'umd') return `v3-waterfall.${format}.js`
+      return 'v3-waterfall.js'
+    }
   },
   rollupOptions: {
     external: ['vue'],
