@@ -248,6 +248,10 @@ watch(list, (newV, oldV) => {
   const clear = !newV.length && oldV.length
   // 默认瀑布流是做增量更新，当第一个元素就发生变化时，认为全部更新
   const isNewList = oldV[0] !== newV[0]
+  if (clear) {
+    // 由于清空时在 waterfall 函数中不会排版计算，因此在这里手动将展示用的数组也清空一下
+    displayList.value = []
+  }
   if (clear || isNewList) {
     init()
     return
