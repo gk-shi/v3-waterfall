@@ -25,6 +25,7 @@ export interface V3WaterfallProps<T> {
   virtualTime?: number
   virtualLength?: number
   heightHook?: HeightHook<ReturnType<typeof useSlots>, T>
+  resizeFlag?: boolean
 }
 
 // 内部需要生成的一些属性
