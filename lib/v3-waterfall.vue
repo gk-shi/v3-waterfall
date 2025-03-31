@@ -96,6 +96,7 @@ const props = withDefaults(defineProps<V3WaterfallProps<T>>(), {
   isMounted: false, // 父组件是否加载完成，和 scrollBodySelector 配合使用
   virtualTime: 0, // 虚拟列表的触发间隔, 默认为 0 时，不做虚拟列表
   virtualLength: 500, // 元素隐藏时距离视窗的距离
+  resizeFlag: true, // 是否开启视窗resize监听重绘
   heightHook: null // 用户自定义元素高度计算方式
 })
 
@@ -114,6 +115,7 @@ const {
   scrollBodySelector,
   virtualTime,
   virtualLength,
+  resizeFlag,
   heightHook
 } = props
 
@@ -291,7 +293,9 @@ onMounted(() => {
   // 延迟渲染，解决类似 van-tab 组件造成的初始化读取父元素容器宽度为0的问题
   nextTick(() => {
     init()
-    window.addEventListener('resize', resizeHandelr)
+    if (resizeFlag) {
+      window.addEventListener('resize', resizeHandelr)
+    }
     // nextTick(() => {
       bind(scrollElement)
       anchorObserverHandler()
@@ -300,7 +304,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', resizeHandelr)
+  if (resizeFlag) {
+    window.removeEventListener('resize', resizeHandelr)
+  }
   unbind()
   anchorDisconnect()
 })

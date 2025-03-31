@@ -134,6 +134,7 @@ createApp(App).use(V3waterfall).mount('#app')
 |     isMounted      |                           boolean                            |          false           |    否    |     父组件是否挂载完成，配合`scrollBodySelector`参数使用     |
 |    virtualTime     |                            number                            |            0             |    否    |        触发虚拟列表校验时间间隔，0 默认不开启虚拟列表        |
 |   virtualLength    |                            number                            |           500            |    否    |            默认移出视窗距离开启虚拟隐藏，单位: px            |
+|     resizeFlag     |                           boolean                            |           true           |    否    | 控制是否监听视窗`resize`事件进行重绘，使用场景参考：[#40](https://github.com/gk-shi/v3-waterfall/issues/40) |
 |     heightHook     | null \| (slots, item, width, errorImgSrc) => Promise\<number> |            -             |    否    |    自定义元素块高度函数钩子，支持promise，此为 props 字段    |
 | scrollReachBottom  |                          () => void                          |            -             |    否    |                     触发加载更多时的函数                     |
 |      reRender      |                          () => void                          |            -             |    -     |          通过 ref 可直接调用该组件方法进行重新渲染           |
